@@ -276,7 +276,7 @@ Save writes `CardioLog` and finishes the session.
 
 ## Phase 5: Settings and routine editing
 
-### - [ ] T15: Settings screen
+### - [x] T15: Settings screen
 **Module:** `routine`
 **Description:** Edit every `Settings` field:
 - Rest seconds, ramp-up weeks, calorie max, protein target (blank = null), goal/start weight, program start date.

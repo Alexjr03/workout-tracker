@@ -5,7 +5,8 @@ import { exerciseDefaultsSchema, routineSeedSchema } from '../seed/schemas';
 import type { WorkoutDb } from './schema';
 import type { ExerciseDef, Routine, Settings } from './types';
 
-function buildSeed(now: Date) {
+/** Settings, routine and catalog exactly as the seed files define them. */
+export function buildSeed(now: Date) {
   const seed = routineSeedSchema.parse(routineJson);
   const defaults = exerciseDefaultsSchema.parse(exerciseDefaultsJson);
 

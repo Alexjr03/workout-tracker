@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../../db/schema';
@@ -92,5 +92,91 @@ describe('SettingsScreen import', () => {
     await userEvent.upload(await screen.findByLabelText('Import backup'), bad);
     expect(await screen.findByText('This file is not a Workout backup.')).toBeInTheDocument();
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('SettingsScreen fields', () => {
+  const field = (name: string) => screen.getByRole('textbox', { name });
+  const stored = async () => (await db.settings.get('settings')) ?? null;
+
+  it('shows the current values', async () => {
+    render(<SettingsScreen />);
+    expect(await screen.findByLabelText('Program start date')).toHaveValue('2026-11-03');
+    expect(field('Ramp-up weeks')).toHaveValue('2');
+    expect(field('Compound rest')).toHaveValue('150');
+    expect(field('Isolation rest')).toHaveValue('75');
+    expect(field('Calorie max')).toHaveValue('1500');
+    expect(field('Protein target')).toHaveValue('');
+    expect(field('Starting weight')).toHaveValue('88');
+    expect(field('Goal weight')).toHaveValue('70');
+  });
+
+  it('saves stepper changes straight away', async () => {
+    render(<SettingsScreen />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Increase Compound rest' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Decrease Calorie max' }));
+    await vi.waitFor(async () =>
+      expect(await stored()).toMatchObject({
+        restSeconds: { compound: 165, isolation: 75 },
+        calorieMax: 1450,
+      }),
+    );
+  });
+
+  it('sets and clears the protein target', async () => {
+    render(<SettingsScreen />);
+    await userEvent.type(await screen.findByRole('textbox', { name: 'Protein target' }), '140');
+    await vi.waitFor(async () => expect((await stored())?.proteinTargetG).toBe(140));
+    await userEvent.clear(field('Protein target'));
+    await vi.waitFor(async () => expect((await stored())?.proteinTargetG).toBeNull());
+  });
+
+  it('shows an error for an invalid value and keeps the saved one', async () => {
+    render(<SettingsScreen />);
+    const calories = await screen.findByRole('textbox', { name: 'Calorie max' });
+    await userEvent.clear(calories);
+    await userEvent.type(calories, '0');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Calorie maximum must be more than 0.',
+    );
+    expect((await stored())?.calorieMax).toBe(1500);
+  });
+
+  it('changes the program start date', async () => {
+    render(<SettingsScreen />);
+    const date = await screen.findByLabelText('Program start date');
+    // The iOS date picker sets the whole value at once.
+    fireEvent.change(date, { target: { value: '2026-11-20' } });
+    await vi.waitFor(async () => expect((await stored())?.programStartDate).toBe('2026-11-20'));
+  });
+
+  it('resets to the seed only after typing RESET', async () => {
+    await db.settings.update('settings', { calorieMax: 2200 });
+    render(<SettingsScreen />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Reset routine to defaults' }));
+    const dialog = screen.getByRole('alertdialog');
+    const confirm = within(dialog).getByRole('button', { name: 'Reset' });
+    expect(confirm).toBeDisabled();
+    await userEvent.type(
+      within(dialog).getByRole('textbox', { name: 'Type RESET to confirm' }),
+      'RESET',
+    );
+    await userEvent.click(confirm);
+
+    expect(
+      await screen.findByText('Routine and settings reset. Your logs are untouched.'),
+    ).toBeInTheDocument();
+    expect((await stored())?.calorieMax).toBe(1500);
+  });
+
+  it('can cancel a reset', async () => {
+    await db.settings.update('settings', { calorieMax: 2200 });
+    render(<SettingsScreen />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Reset routine to defaults' }));
+    await userEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }),
+    );
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect((await stored())?.calorieMax).toBe(2200);
   });
 });

@@ -74,7 +74,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 **Checkpoint D:** export → wipe → import round trip identical (E2E)
 
 ### Phase 5: Settings and routine editing
-- [ ] T15: Settings screen
+- [x] T15: Settings screen
 - [ ] T16: Routine editor: schedule and exercise catalog
 - [ ] T17: Routine editor: session templates
 

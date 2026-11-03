@@ -344,6 +344,14 @@ button:disabled {
   text-align: left;
 }
 
+.error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
 /* A link or file-picker label that looks and taps like a button. */
 .button-like {
   display: flex;
