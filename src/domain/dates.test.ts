@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addDays, daysBetween, isLocalDate, toLocalDate, weekdayOf } from './dates';
+import { addDays, daysBetween, formatDayLabel, isLocalDate, toLocalDate, weekdayOf } from './dates';
 
 describe('toLocalDate', () => {
   it('uses the local calendar day, not UTC', () => {
@@ -41,6 +41,13 @@ describe('weekdayOf', () => {
     expect(weekdayOf('2026-11-02')).toBe('monday');
     expect(weekdayOf('2026-11-03')).toBe('tuesday');
     expect(weekdayOf('2026-11-08')).toBe('sunday');
+  });
+});
+
+describe('formatDayLabel', () => {
+  it('reads as weekday, month and day', () => {
+    expect(formatDayLabel('2026-11-23')).toBe('Monday, Nov 23');
+    expect(formatDayLabel('2027-01-02')).toBe('Saturday, Jan 2');
   });
 });
 

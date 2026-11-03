@@ -132,7 +132,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 
 ## Phase 3: Workout logging
 
-### - [ ] T7: Today screen and starting a session
+### - [x] T7: Today screen and starting a session
 **Module:** `workout-logging`
 **Description:**
 - The Today screen shows today's scheduled session (name, exercise count, target minutes), "Rest day" on rest days, and a ramp-up banner during ramp-up weeks.

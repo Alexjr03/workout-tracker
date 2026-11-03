@@ -58,7 +58,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 **Checkpoint B:** `src/domain/` at 100% branch coverage
 
 ### Phase 3: Workout logging
-- [ ] T7: Today screen and starting a session
+- [x] T7: Today screen and starting a session
 - [ ] T8: Session runner and durable set logging
 - [ ] T9: Resume after close, undo/edit, finish summary
 - [ ] T10: Rest timer

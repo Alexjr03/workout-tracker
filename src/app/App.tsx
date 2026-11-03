@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import { BottomNav } from './BottomNav';
-import { TABS } from './routes';
+import { SCREENS, TABS } from './routes';
 
 function Shell({ overlay }: { overlay?: ReactNode }) {
   return (
@@ -19,8 +19,8 @@ export function AppRoutes({ overlay }: { overlay?: ReactNode }) {
   return (
     <Routes>
       <Route element={<Shell overlay={overlay} />}>
-        {TABS.map((tab) => (
-          <Route key={tab.path} path={tab.path} element={tab.element} />
+        {[...TABS, ...SCREENS].map((screen) => (
+          <Route key={screen.path} path={screen.path} element={screen.element} />
         ))}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

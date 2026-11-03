@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { resetDb } from '../test/db';
 import { AppRoutes } from './App';
 
 function renderAt(path: string) {
@@ -11,6 +12,10 @@ function renderAt(path: string) {
     </MemoryRouter>,
   );
 }
+
+beforeEach(async () => {
+  await resetDb();
+});
 
 describe('AppRoutes', () => {
   it('shows the five tabs in order', () => {
@@ -22,9 +27,9 @@ describe('AppRoutes', () => {
     expect(labels).toEqual(['Today', 'History', 'Body', 'Food', 'Settings']);
   });
 
-  it('opens Today by default and marks its tab as current', () => {
+  it('opens Today by default and marks its tab as current', async () => {
     renderAt('/');
-    expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
   });
 
@@ -35,8 +40,8 @@ describe('AppRoutes', () => {
     expect(screen.getByRole('link', { name: 'Food' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('sends unknown paths to Today', () => {
+  it('sends unknown paths to Today', async () => {
     renderAt('/nope');
-    expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeInTheDocument();
   });
 });

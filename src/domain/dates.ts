@@ -46,6 +46,16 @@ export function weekdayOf(date: LocalDate): Weekday {
   return WEEKDAYS[new Date(toUtcMs(date)).getUTCDay()] as Weekday;
 }
 
+/** 'Monday, Nov 23' */
+export function formatDayLabel(date: LocalDate): string {
+  return new Date(toUtcMs(date)).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
 export function isLocalDate(value: string): boolean {
   return PATTERN.test(value) && fromUtcMs(toUtcMs(value)) === value;
 }
