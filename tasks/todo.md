@@ -240,7 +240,7 @@ Save writes `CardioLog` and finishes the session.
 
 ## Phase 4: Backup
 
-### - [ ] T13: JSON export via Share Sheet
+### - [x] T13: JSON export via Share Sheet
 **Module:** `backup`
 **Description:** `exportAll()` builds the SPEC export envelope from every table. Export uses `navigator.share({ files })` when `canShare` allows it, with a download link as fallback. Filename: `workout-backup-YYYY-MM-DD.json`. Sets `lastExportAt`.
 

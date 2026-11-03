@@ -68,7 +68,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 **Checkpoint C:** E2E full Upper A session + reload mid-session · **real gym session on iPhone** · human review
 
 ### Phase 4: Backup
-- [ ] T13: JSON export via Share Sheet
+- [x] T13: JSON export via Share Sheet
 - [ ] T14: Validated import and backup reminder
 
 **Checkpoint D:** export → wipe → import round trip identical (E2E)

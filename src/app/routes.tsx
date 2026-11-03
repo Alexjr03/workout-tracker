@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { FinishSummary } from '../features/session/FinishSummary';
 import { SessionRunner } from '../features/session/SessionRunner';
+import { SettingsScreen } from '../features/settings/SettingsScreen';
 import { TodayScreen } from '../features/today/TodayScreen';
 
 export interface Tab {
@@ -19,7 +20,7 @@ export const TABS: Tab[] = [
   { path: '/history', label: 'History', element: <Placeholder title="History" /> },
   { path: '/body', label: 'Body', element: <Placeholder title="Body" /> },
   { path: '/food', label: 'Food', element: <Placeholder title="Food" /> },
-  { path: '/settings', label: 'Settings', element: <Placeholder title="Settings" /> },
+  { path: '/settings', label: 'Settings', element: <SettingsScreen /> },
 ];
 
 /** Screens reached from a tab rather than the nav bar. */
