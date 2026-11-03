@@ -40,6 +40,12 @@ describe('AppRoutes', () => {
     expect(screen.getByRole('link', { name: 'Food' })).toHaveAttribute('aria-current', 'page');
   });
 
+  it('hides the tab bar on the full-screen session runner', async () => {
+    renderAt('/session');
+    expect(await screen.findByText('No session in progress.')).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
+  });
+
   it('sends unknown paths to Today', async () => {
     renderAt('/nope');
     expect(await screen.findByRole('heading', { name: 'Today' })).toBeInTheDocument();

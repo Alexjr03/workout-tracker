@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router';
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router';
 import { BottomNav } from './BottomNav';
 import { SCREENS, TABS } from './routes';
 
 function Shell({ overlay }: { overlay?: ReactNode }) {
+  // The session runner is full screen so the current exercise and next action always fit.
+  const fullScreen = useLocation().pathname === '/session';
   return (
     <>
-      <main className="screen">
+      <main className={fullScreen ? 'screen screen--full' : 'screen'}>
         <Outlet />
       </main>
       {overlay}
-      <BottomNav />
+      {!fullScreen && <BottomNav />}
     </>
   );
 }

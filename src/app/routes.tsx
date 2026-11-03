@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { SessionRunner } from '../features/session/SessionRunner';
 import { TodayScreen } from '../features/today/TodayScreen';
 
 export interface Tab {
@@ -22,5 +23,5 @@ export const TABS: Tab[] = [
 
 /** Screens reached from a tab rather than the nav bar. */
 export const SCREENS: { path: string; element: ReactNode }[] = [
-  { path: '/session', element: <Placeholder title="Session" /> },
+  { path: '/session', element: <SessionRunner /> },
 ];

@@ -125,7 +125,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Scope:** S
 
 ### Checkpoint B: Domain
-- [ ] `src/domain/**` at 100% branch coverage
+- [x] `src/domain/**` at 100% branch coverage
 - [ ] Rules reviewed against SPEC (human skim of the test names)
 
 ---
@@ -150,7 +150,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Files:** `src/features/today/TodayScreen.tsx`(+test), `src/db/repos/sessions.ts`(+test), `src/app/routes.tsx`
 **Scope:** M
 
-### - [ ] T8: Session runner and durable set logging
+### - [x] T8: Session runner and durable set logging
 **Module:** `workout-logging`
 **Description:**
 - **Runner view:** exercise name, "Set N of M", rep target + RIR text, weight `Stepper` (± increment, tap to type, basis label), reps `Stepper`, **Complete set** button, **Up next**, and a collapsible overview with jump-to-exercise.
