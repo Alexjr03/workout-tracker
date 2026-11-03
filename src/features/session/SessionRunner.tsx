@@ -10,6 +10,7 @@ import { loadBasisLabel } from '../../domain/session';
 import { Stepper } from '../../ui/Stepper';
 import { primeAudio, useWakeLock } from '../timer/alerts';
 import { RestTimerBar } from '../timer/RestTimerBar';
+import { CardioForm } from './CardioForm';
 import { SessionOverview } from './SessionOverview';
 import { SwapSheet } from './SwapSheet';
 import { useRunnerData, type RunnerData, type RunnerSlot } from './useRunnerData';
@@ -150,6 +151,16 @@ export function SessionRunner() {
   }
 
   const { sessionId } = data;
+  if (data.cardio) {
+    return (
+      <div className="runner">
+        <header className="runner-header">
+          <Link to="/">‹ Today</Link>
+        </header>
+        <CardioForm sessionId={sessionId} name={data.sessionName} template={data.cardio} />
+      </div>
+    );
+  }
   const current = data.slots[data.exerciseIndex];
   const upNext = data.slots.find(
     (s, i) => i > data.exerciseIndex && s.sets.length < s.slot.prescribedSets,

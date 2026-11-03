@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { lastTimeSets, lastWeightFor } from '../../db/repos/sets';
 import { db } from '../../db/schema';
 import type { ExerciseDef, SessionExerciseLog, SetLog } from '../../db/types';
+import type { CardioTemplate } from './CardioForm';
 
 export interface RunnerSlot {
   slot: SessionExerciseLog;
@@ -14,6 +15,8 @@ export interface RunnerSlot {
 export interface RunnerData {
   sessionName: string;
   sessionId: string;
+  /** Set for cardio sessions, which log a machine and minutes instead of sets. */
+  cardio: CardioTemplate | null;
   slots: RunnerSlot[];
   exerciseIndex: number;
   /** Values typed for the current set before the app closed. */
@@ -37,6 +40,7 @@ async function load(): Promise<RunnerData | null> {
     db.routine.get('routine'),
   ]);
   if (!session) return null;
+  const template = routine?.sessions[session.templateId];
 
   const [defs, originals] = await Promise.all([
     db.exercises.bulkGet(slots.map((s) => s.exerciseId)),
@@ -65,6 +69,7 @@ async function load(): Promise<RunnerData | null> {
   return {
     sessionName: session.templateName,
     sessionId: session.id,
+    cardio: template && 'cardio' in template ? template.cardio : null,
     slots: runnerSlots,
     exerciseIndex: active.exerciseIndex,
     draft: { weight: active.draftWeight, reps: active.draftReps },

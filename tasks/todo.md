@@ -212,7 +212,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Files:** `src/features/session/SwapSheet.tsx`(+test), `src/db/repos/exercises.ts`(+test), `src/ui/Sheet.tsx`
 **Scope:** M
 
-### - [ ] T12: Cardio session
+### - [x] T12: Cardio session
 **Module:** `workout-logging`
 **Description:** Starting the Cardio template opens the cardio form:
 - Machine buttons from seed options + "Other…".
@@ -232,7 +232,7 @@ Save writes `CardioLog` and finishes the session.
 **Scope:** S
 
 ### Checkpoint C: Logging
-- [ ] E2E: complete a full Upper A session, including the auto rest timer and finish
+- [x] E2E: complete a full Upper A session, including the auto rest timer and finish (`e2e/workout.spec.ts`)
 - [ ] Redeploy; the user does **one real gym session** on iPhone and reports friction
 - [ ] Human review before continuing
 

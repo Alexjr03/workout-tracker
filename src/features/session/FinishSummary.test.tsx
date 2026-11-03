@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { saveCardio } from '../../db/repos/cardio';
 import { finishSession, startSession } from '../../db/repos/sessions';
 import { completeSet } from '../../db/repos/sets';
 import { db } from '../../db/schema';
@@ -49,6 +50,15 @@ describe('FinishSummary', () => {
     await finishSession(db, id, at(5));
     renderSummary(id);
     expect(await screen.findByText('No weight increases this time.')).toBeInTheDocument();
+  });
+
+  it('summarises a cardio session', async () => {
+    const id = await startSession(db, 'cardio', MON);
+    await saveCardio(db, id, { machine: 'StairMaster', durationMin: 35, notes: '' }, at(36));
+    renderSummary(id);
+    expect(await screen.findByRole('heading', { name: 'Cardio done' })).toBeInTheDocument();
+    expect(screen.getByText('StairMaster · 35 min')).toBeInTheDocument();
+    expect(screen.queryByText(/sets/)).not.toBeInTheDocument();
   });
 
   it('handles an unknown session id', async () => {

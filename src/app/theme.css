@@ -344,6 +344,35 @@ button:disabled {
   text-align: left;
 }
 
+button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.field input,
+.field textarea {
+  min-height: var(--tap-primary);
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
 .runner-undo {
   align-self: flex-start;
   color: var(--text-dim);
