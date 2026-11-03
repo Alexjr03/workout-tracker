@@ -260,3 +260,58 @@ describe('SessionRunner: rest timer', () => {
     });
   });
 });
+
+describe('SessionRunner: swap', () => {
+  it('swaps to a new exercise for this session only', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Swap' }));
+    const sheet = screen.getByRole('dialog', { name: 'Swap Bench press' });
+    await userEvent.type(
+      within(sheet).getByRole('textbox', { name: 'New exercise' }),
+      'Floor press',
+    );
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Add and swap' }));
+
+    expect(await screen.findByRole('heading', { name: 'Floor press' })).toBeInTheDocument();
+    expect(screen.getByText('Swapped for Bench press')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(weight()).toHaveValue('');
+    expect(screen.getByText('lb')).toBeInTheDocument();
+  });
+
+  it('swaps to a catalog exercise and back again', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Swap' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Incline dumbbell press' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Incline dumbbell press' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('lb each')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Back to Bench press' }));
+    expect(await screen.findByRole('heading', { name: 'Bench press' })).toBeInTheDocument();
+    expect(screen.queryByText(/Swapped for/)).not.toBeInTheDocument();
+    expect(weight()).toHaveValue('10');
+  });
+
+  it('can be cancelled', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Swap' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bench press' })).toBeInTheDocument();
+  });
+
+  it('is not offered once a set of the exercise is logged', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    await userEvent.click(completeButton());
+    await screen.findByText('Set 2 of 3');
+    expect(screen.queryByRole('button', { name: 'Swap' })).not.toBeInTheDocument();
+  });
+});

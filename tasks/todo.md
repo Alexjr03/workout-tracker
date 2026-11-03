@@ -198,7 +198,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Files:** `src/features/timer/{useRestTimer,RestTimerBar}.tsx`(+tests), `src/features/session/SessionRunner.tsx`
 **Scope:** M
 
-### - [ ] T11: Exercise swap
+### - [x] T11: Exercise swap
 **Module:** `workout-logging`
 **Description:** A **Swap** action opens a sheet listing catalog exercises of the same type plus a "New exercise" name field. Swapping sets this slot's `exerciseId` to the substitute and `replacesExerciseId` to the original. New names create an `ExerciseDef` with `isCustom: true`, a slug id (with a suffix on collision), `total`, and increment 5.
 

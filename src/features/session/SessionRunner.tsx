@@ -11,6 +11,7 @@ import { Stepper } from '../../ui/Stepper';
 import { primeAudio, useWakeLock } from '../timer/alerts';
 import { RestTimerBar } from '../timer/RestTimerBar';
 import { SessionOverview } from './SessionOverview';
+import { SwapSheet } from './SwapSheet';
 import { useRunnerData, type RunnerData, type RunnerSlot } from './useRunnerData';
 
 interface SetEntryProps {
@@ -43,6 +44,7 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
       defaultReps({ setIndex, lastTimeSets: history.lastTimeSets, repMax: slot.repMax }),
   );
   const [saving, setSaving] = useState(false);
+  const [swapping, setSwapping] = useState(false);
   const unit = loadBasisLabel(def.loadBasis);
   const canComplete = weight !== null && reps !== null && reps >= 1 && !saving;
 
@@ -63,7 +65,17 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
   return (
     <>
       <div className="runner-target">
-        <h1>{def.name}</h1>
+        <div className="runner-title">
+          <h1>{def.name}</h1>
+          {/* Swapping is only allowed before the exercise's first set. */}
+          {setIndex === 0 && (
+            <button type="button" onClick={() => setSwapping(true)}>
+              Swap
+            </button>
+          )}
+        </div>
+        {current.replacesName && <p className="muted">Swapped for {current.replacesName}</p>}
+        {swapping && <SwapSheet current={current} onClose={() => setSwapping(false)} />}
         <p className="runner-set">
           Set {setIndex + 1} of {slot.prescribedSets}
         </p>
@@ -195,7 +207,7 @@ export function SessionRunner() {
 
       {current && data.current ? (
         <SetEntry
-          key={`${current.slot.id}:${current.sets.length}`}
+          key={`${current.slot.id}:${current.slot.exerciseId}:${current.sets.length}`}
           current={current}
           history={data.current}
           draft={data.draft}

@@ -26,9 +26,10 @@ export async function completeSet(
   const { slot, weight, reps, now = new Date() } = input;
   const tables = [db.sets, db.sessionExercises, db.activeSession, db.settings, db.exercises];
   return db.transaction('rw', tables, async () => {
+    // A swapped-in exercise keeps the rest time of the one it replaces.
     const [settings, def] = await Promise.all([
       db.settings.get('settings'),
-      db.exercises.get(slot.exerciseId),
+      db.exercises.get(slot.replacesExerciseId ?? slot.exerciseId),
     ]);
     const setIndex = await db.sets.where('sessionExerciseId').equals(slot.id).count();
     const set: SetLog = {

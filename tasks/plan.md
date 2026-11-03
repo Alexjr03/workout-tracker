@@ -62,7 +62,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 - [x] T8: Session runner and durable set logging
 - [x] T9: Resume after close, undo/edit, finish summary
 - [x] T10: Rest timer
-- [ ] T11: Exercise swap
+- [x] T11: Exercise swap
 - [ ] T12: Cardio session
 
 **Checkpoint C:** E2E full Upper A session + reload mid-session · **real gym session on iPhone** · human review

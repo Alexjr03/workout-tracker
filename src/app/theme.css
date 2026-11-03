@@ -271,6 +271,79 @@ button:disabled {
   }
 }
 
+.runner-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.runner-title button {
+  flex: none;
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(0 0 0 / 0.7);
+}
+
+.sheet {
+  width: 100%;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 20px var(--gutter) calc(env(safe-area-inset-bottom) + 16px);
+  border-radius: 20px 20px 0 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.sheet > button {
+  width: 100%;
+}
+
+.swap-new {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.swap-new label {
+  grid-column: 1 / -1;
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.swap-new input {
+  min-height: var(--tap-primary);
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 12px;
+  min-width: 0;
+}
+
+.swap-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.swap-options button {
+  width: 100%;
+  text-align: left;
+}
+
 .runner-undo {
   align-self: flex-start;
   color: var(--text-dim);

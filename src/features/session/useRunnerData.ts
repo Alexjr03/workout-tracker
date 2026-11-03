@@ -6,6 +6,8 @@ import type { ExerciseDef, SessionExerciseLog, SetLog } from '../../db/types';
 export interface RunnerSlot {
   slot: SessionExerciseLog;
   def: ExerciseDef;
+  /** Name of the exercise this one was swapped in for, if any. */
+  replacesName: string | null;
   sets: SetLog[];
 }
 
@@ -36,11 +38,19 @@ async function load(): Promise<RunnerData | null> {
   ]);
   if (!session) return null;
 
-  const defs = await db.exercises.bulkGet(slots.map((s) => s.exerciseId));
+  const [defs, originals] = await Promise.all([
+    db.exercises.bulkGet(slots.map((s) => s.exerciseId)),
+    db.exercises.bulkGet(slots.map((s) => s.replacesExerciseId ?? '')),
+  ]);
   const runnerSlots = slots.map((slot, i) => {
     const def = defs[i];
     if (!def) throw new Error(`Exercise ${slot.exerciseId} is missing from the catalog`);
-    return { slot, def, sets: sets.filter((s) => s.sessionExerciseId === slot.id) };
+    return {
+      slot,
+      def,
+      replacesName: originals[i]?.name ?? null,
+      sets: sets.filter((s) => s.sessionExerciseId === slot.id),
+    };
   });
 
   const currentSlot = runnerSlots[active.exerciseIndex];
