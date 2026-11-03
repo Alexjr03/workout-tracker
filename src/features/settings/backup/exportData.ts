@@ -1,8 +1,8 @@
 import type { WorkoutDb } from '../../../db/schema';
 import { toLocalDate } from '../../../domain/dates';
 
-/** Bump with every change to the export shape; import (T14) migrates older versions. */
-export const BACKUP_SCHEMA_VERSION = 1;
+/** Bump with every change to the export shape and add a migration in importData.ts. v2: optional ramp-up sets. */
+export const BACKUP_SCHEMA_VERSION = 2;
 
 export async function buildBackup(db: WorkoutDb, now = new Date()) {
   return db.transaction('r', db.tables, async () => ({

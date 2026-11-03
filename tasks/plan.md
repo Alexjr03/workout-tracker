@@ -69,7 +69,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 
 ### Phase 4: Backup
 - [x] T13: JSON export via Share Sheet
-- [ ] T14: Validated import and backup reminder
+- [x] T14: Validated import and backup reminder
 
 **Checkpoint D:** export → wipe → import round trip identical (E2E)
 

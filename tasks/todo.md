@@ -254,7 +254,7 @@ Save writes `CardioLog` and finishes the session.
 **Files:** `src/features/settings/backup/{exportData,ExportButton}.ts(x)`(+tests)
 **Scope:** S
 
-### - [ ] T14: Validated import and backup reminder
+### - [x] T14: Validated import and backup reminder
 **Module:** `backup`
 **Description:** File picker → zod-validate against `schemaVersion` (migration hook for older versions) → preview record counts → confirm "Replace all data on this device?" → clear and write in one transaction. Errors are shown in plain language. The Today screen shows a dismissible nudge if `lastExportAt` is null or older than 7 days. Settings shows "Last backup: N days ago".
 
@@ -269,7 +269,7 @@ Save writes `CardioLog` and finishes the session.
 **Scope:** M
 
 ### Checkpoint D: Backup
-- [ ] Round-trip E2E green
+- [x] Round-trip E2E green (`e2e/backup.spec.ts`)
 - [ ] Manual export/import on iPhone through Files
 
 ---

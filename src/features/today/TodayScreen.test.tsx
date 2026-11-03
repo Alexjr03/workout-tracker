@@ -30,6 +30,7 @@ describe('TodayScreen', () => {
     expect(within(card).getByText('6 exercises')).toBeInTheDocument();
     expect(within(card).getByRole('button', { name: 'Start Upper A' })).toBeInTheDocument();
     expect(screen.getByText('Monday, Nov 23')).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Backup reminder' })).toBeInTheDocument();
     expect(screen.queryByText(/Ramp-up week/)).not.toBeInTheDocument();
   });
 

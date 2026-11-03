@@ -7,6 +7,7 @@ import type { SessionTemplate } from '../../db/types';
 import { daysBetween, formatDayLabel, toLocalDate } from '../../domain/dates';
 import { prescriptionFor } from '../../domain/rampUp';
 import { sessionForDate } from '../../domain/schedule';
+import { BackupNudge } from './BackupNudge';
 
 function summary(template: SessionTemplate): string {
   if ('cardio' in template) {
@@ -116,6 +117,8 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
           </button>
         ))}
       </section>
+
+      <BackupNudge now={now} />
     </div>
   );
 }

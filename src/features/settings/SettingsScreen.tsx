@@ -3,6 +3,7 @@ import { useId } from 'react';
 import { db } from '../../db/schema';
 import { lastBackupText } from '../../domain/backup';
 import { ExportButton } from './backup/ExportButton';
+import { ImportButton } from './backup/ImportButton';
 
 // The rest of Settings (rest times, targets, routine editor) arrives in T15–T17.
 export function SettingsScreen() {
@@ -20,6 +21,7 @@ export function SettingsScreen() {
         </p>
         <p>{lastBackupText(settings.lastExportAt, new Date())}</p>
         <ExportButton />
+        <ImportButton />
       </section>
     </div>
   );
