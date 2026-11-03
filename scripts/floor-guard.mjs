@@ -36,8 +36,20 @@ for (const { file, text } of diff.added) {
     flag('network-call', file, text);
 }
 
+// Assertions removed: flag a test file only when it ends with fewer assertion lines than it had,
+// so rewriting an assertion is allowed but stripping one is not (owner decision, 2026-11-03).
+const ASSERTION = /\b(expect|assert)\b/;
+const assertionDelta = new Map();
+for (const { file, text } of diff.added) {
+  if (TEST.test(file) && ASSERTION.test(text))
+    assertionDelta.set(file, (assertionDelta.get(file) ?? 0) + 1);
+}
 for (const { file, text } of diff.removed) {
-  if (TEST.test(file) && /\b(expect|assert)\b/.test(text)) flag('assertion-removed', file, text);
+  if (TEST.test(file) && ASSERTION.test(text))
+    assertionDelta.set(file, (assertionDelta.get(file) ?? 0) - 1);
+}
+for (const [file, delta] of assertionDelta) {
+  if (delta < 0) flag('assertion-removed', file, `${-delta} fewer assertion line(s)`);
 }
 
 // Weakened threshold: a CONSTRAINTS.md line whose leading cell matches but whose numbers went down.

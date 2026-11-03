@@ -10,7 +10,7 @@ Checked by `node scripts/floor-guard.mjs` against the diff since `main` (or ever
 
 - No new suppression comments: `@ts-ignore`, `@ts-nocheck`, `@ts-expect-error`, `eslint-disable`, `istanbul`/`v8`/`c8 ignore`, `gitleaks:allow`. Each one switches off a check this file relies on.
 - No unfinished work: `throw new Error('Not implemented')`, empty `catch {}`, `TODO`/`FIXME` in code. A silent catch could hide a failed IndexedDB write, which is exactly the data loss the spec forbids.
-- No skipped, focused or deleted tests, and no assertions removed from tests that remain (`.skip`, `.only`, `.todo`, `xit`, `.fixme`).
+- No skipped, focused or deleted tests (`.skip`, `.only`, `.todo`, `xit`, `.fixme`), and no test file ending a change with fewer `expect`/`assert` lines than it started with. Rewriting an assertion is fine; stripping one is not.
 - No network calls in `src/` (`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `EventSource`). SPEC › Boundaries: offline-only, no backend, no telemetry.
 - No secrets in source. Checked by gitleaks.
 - This file is never weakened to make a change pass. Lowering a number, deleting a floor rule, or adding an exception is flagged by the guard and needs the owner's OK in chat first.
