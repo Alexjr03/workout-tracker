@@ -79,7 +79,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 - [x] T17: Routine editor: session templates
 
 ### Phase 6: History
-- [ ] T18: SVG LineChart component
+- [x] T18: SVG LineChart component
 - [ ] T19: History list and session detail
 - [ ] T20: Exercise progress chart
 

@@ -327,7 +327,7 @@ Save writes `CardioLog` and finishes the session.
 
 ## Phase 6: History
 
-### - [ ] T18: SVG LineChart component
+### - [x] T18: SVG LineChart component
 **Module:** `history` (shared UI)
 **Description:** A responsive SVG line chart with these props:
 - 1–2 series.

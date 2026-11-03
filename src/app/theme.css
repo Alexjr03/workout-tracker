@@ -533,3 +533,99 @@ button[aria-pressed='true'] {
 .update-prompt span {
   flex: 1;
 }
+
+/* Charts. Series colours validated on #000 (dataviz validator, dark mode). */
+.chart {
+  margin: 0;
+}
+
+.chart-primary {
+  --series: #c08400;
+}
+
+.chart-secondary {
+  --series: #3a8ee6;
+}
+
+.chart-svg {
+  display: block;
+  overflow: visible;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-point {
+  fill: var(--series);
+  stroke: var(--bg);
+  stroke-width: 2px;
+}
+
+.chart-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.chart-hit:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 2px;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1px;
+  opacity: 0.5;
+}
+
+.chart-axis,
+.chart-reference-label,
+.chart-shade-label {
+  fill: var(--text-dim);
+  font-size: 11px;
+}
+
+.chart-reference {
+  stroke: var(--text-dim);
+  stroke-width: 1px;
+  stroke-dasharray: 4 4;
+}
+
+.chart-shade {
+  fill: var(--surface);
+}
+
+.chart-legend {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  margin: 0 0 6px;
+  padding: 0;
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-swatch {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--series);
+}
+
+.chart-readout {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 15px;
+  min-height: 1.4em;
+}
