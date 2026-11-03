@@ -3,6 +3,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // GitHub Pages serves the app from /workout-tracker/ (see .github/workflows/deploy.yml).
+  base: process.env.GITHUB_PAGES === 'true' ? '/workout-tracker/' : '/',
   plugins: [
     react(),
     VitePWA({
