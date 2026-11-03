@@ -46,16 +46,16 @@ Add `react-router` with 5 placeholder routes and a bottom tab bar. Add the high-
 **Files:** `vite.config.ts`, `public/icons/*`, `index.html`, `src/app/{App,routes,BottomNav,UpdatePrompt}.tsx`, `src/app/theme.css`, `e2e/offline.spec.ts`
 **Scope:** M
 
-### - [ ] T3: Deploy to GitHub Pages and install on iPhone
+### - [x] T3: Deploy to GitHub Pages and install on iPhone
 **Module:** `app-shell`
 **Description:** Add a GitHub Actions workflow that builds and publishes `dist/` to Pages, and set the Vite `base` for the repo path. **Ask the user before creating the repo or pushing.**
 
-Deployed 2026-11-03 (live, verified loading + SW + seed). **Waiting on: iPhone install check by the owner.** Decided: **public** repo `workout-tracker` on GitHub account **Alexjr03** (the active `gh` account). URL: `https://alexjr03.github.io/workout-tracker/`, Vite `base: '/workout-tracker/'`.
+Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone install and offline launch on 2026-11-03. Decided: **public** repo `workout-tracker` on GitHub account **Alexjr03** (the active `gh` account). URL: `https://alexjr03.github.io/workout-tracker/`, Vite `base: '/workout-tracker/'`.
 
 **Acceptance criteria:**
-- [ ] App is served over HTTPS at the Pages URL.
-- [ ] On the user's iPhone: Share → Add to Home Screen. It opens standalone (no Safari chrome) with the right icon.
-- [ ] It launches from the Home Screen in airplane mode.
+- [x] App is served over HTTPS at the Pages URL.
+- [x] On the user's iPhone: Share → Add to Home Screen. It opens standalone (no Safari chrome) with the right icon.
+- [x] It launches from the Home Screen in airplane mode.
 
 **Verification:** Manual on iPhone (user confirms)
 **Dependencies:** T2
@@ -82,9 +82,9 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). **Waiting on: iPhone i
 **Scope:** M
 
 ### Checkpoint A: Foundation
-- [ ] `npm run check` and `npm run test:e2e` pass
-- [ ] Installed on iPhone and opens offline
-- [ ] Seed data visible in IndexedDB (devtools)
+- [x] `npm run check` and `npm run test:e2e` pass
+- [x] Installed on iPhone and opens offline
+- [x] Seed data visible in IndexedDB (E2E `seed.spec.ts` + live site check)
 
 ---
 
