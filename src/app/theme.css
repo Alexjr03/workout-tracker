@@ -671,3 +671,9 @@ button[aria-pressed='true'] {
   font-size: 15px;
   color: var(--text);
 }
+
+.chart-unit {
+  margin: 0 0 2px;
+  color: var(--text-dim);
+  font-size: 13px;
+}

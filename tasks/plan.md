@@ -81,7 +81,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 ### Phase 6: History
 - [x] T18: SVG LineChart component
 - [x] T19: History list and session detail
-- [ ] T20: Exercise progress chart
+- [x] T20: Exercise progress chart
 
 ### Phase 7: Body weight and nutrition
 - [ ] T21: Body weight log, chart, 7-day average

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ExerciseProgress } from '../features/history/ExerciseProgress';
 import { HistoryList } from '../features/history/HistoryList';
 import { SessionDetailScreen } from '../features/history/SessionDetailScreen';
 import { FinishSummary } from '../features/session/FinishSummary';
@@ -33,6 +34,7 @@ export const SCREENS: { path: string; element: ReactNode }[] = [
   { path: '/session', element: <SessionRunner /> },
   { path: '/summary/:sessionId', element: <FinishSummary /> },
   { path: '/history/session/:sessionId', element: <SessionDetailScreen /> },
+  { path: '/history/exercises', element: <ExerciseProgress /> },
   { path: '/settings/schedule', element: <ScheduleEditor /> },
   { path: '/settings/exercises', element: <CatalogEditor /> },
   { path: '/settings/sessions/:templateId', element: <TemplateEditor /> },

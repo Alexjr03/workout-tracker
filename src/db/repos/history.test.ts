@@ -3,7 +3,7 @@ import { resetDb } from '../../test/db';
 import { db } from '../schema';
 import { saveCardio } from './cardio';
 import { swapExercise } from './exercises';
-import { listHistory, sessionDetail } from './history';
+import { exerciseProgress, listHistory, loggedExercises, sessionDetail } from './history';
 import { updateTemplateExercise } from './routine';
 import { discardSession, finishSession, startSession } from './sessions';
 import { completeSet } from './sets';
@@ -146,5 +146,46 @@ describe('sessionDetail', () => {
 
   it('is null for an unknown session', async () => {
     expect(await sessionDetail(db, 'nope')).toBeNull();
+  });
+});
+
+describe('exercise progress queries', () => {
+  it('lists exercises with finished sets, including swap-created ones, by name', async () => {
+    await upperA(MON);
+    const id = await startSession(db, 'legs', new Date(2026, 10, 24, 18));
+    const slot = (await db.sessionExercises.where('sessionId').equals(id).toArray()).find(
+      (s) => s.exerciseId === 'leg-press',
+    );
+    if (!slot) throw new Error('fixture');
+    await swapExercise(db, slot.id, { newName: 'Hack squat' });
+    const hack = await db.sessionExercises.get(slot.id);
+    if (!hack) throw new Error('fixture');
+    await completeSet(db, { slot: hack, weight: 90, reps: 12 });
+    await finishSession(db, id);
+    // An active session's sets don't count yet.
+    const active = await startSession(db, 'upper-b', new Date(2026, 10, 25, 18));
+    const [incline] = await db.sessionExercises.where('sessionId').equals(active).sortBy('order');
+    if (!incline) throw new Error('fixture');
+    await completeSet(db, { slot: incline, weight: 30, reps: 10 });
+
+    expect((await loggedExercises(db)).map((e) => e.name)).toEqual([
+      'Bench press',
+      'Chest-supported or machine row',
+      'Hack squat',
+    ]);
+  });
+
+  it('returns each finished session’s sets for one exercise', async () => {
+    await upperA(MON);
+    expect(await exerciseProgress(db, 'bench-press')).toEqual([
+      {
+        date: '2026-11-23',
+        rampUp: false,
+        sets: [
+          { weight: 10, reps: 10 },
+          { weight: 12.5, reps: 8 },
+        ],
+      },
+    ]);
   });
 });

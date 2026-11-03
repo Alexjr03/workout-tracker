@@ -56,7 +56,10 @@ export function LineChart({
   const [y0, y1] = domain([...all.map((p) => p.y), ...referenceLines.map((r) => r.y)]);
   const sx = (x: number) => PAD.left + ((x - x0) / (x1 - x0)) * (W - PAD.left - PAD.right);
   const sy = (y: number) => H - PAD.bottom - ((y - y0) / (y1 - y0)) * (H - PAD.top - PAD.bottom);
-  const ticks = [y0, (y0 + y1) / 2, y1].map((t) => Math.round(t * 10) / 10);
+  // Ticks at the data's own lowest, middle and highest values, not the padded edges.
+  const ys = [...all.map((p) => p.y), ...referenceLines.map((r) => r.y)];
+  const [lo, hi] = [Math.min(...ys), Math.max(...ys)];
+  const ticks = [...new Set([lo, (lo + hi) / 2, hi].map((t) => Math.round(t * 10) / 10))];
   const xs = all.map((p) => p.x);
   const describe = (p: ChartPoint) => `${formatX(p.x)}: ${formatY(p.y)}`;
 
@@ -72,6 +75,7 @@ export function LineChart({
           ))}
         </ul>
       )}
+      <p className="chart-unit">{yLabel}</p>
       <svg
         role="group"
         aria-label={label}
@@ -89,7 +93,7 @@ export function LineChart({
               height={H - PAD.top - PAD.bottom}
             />
             {r.label && (
-              <text className="chart-shade-label" x={sx(r.from) + 4} y={PAD.top + 12}>
+              <text className="chart-shade-label" x={sx(r.from) + 4} y={H - PAD.bottom - 4}>
                 {r.label}
               </text>
             )}
@@ -104,9 +108,6 @@ export function LineChart({
             </text>
           </g>
         ))}
-        <text className="chart-axis" x={4} y={PAD.top - 4}>
-          {yLabel}
-        </text>
         <text className="chart-axis" x={PAD.left} y={H - 6}>
           {formatX(Math.min(...xs))}
         </text>

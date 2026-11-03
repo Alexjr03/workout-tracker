@@ -362,7 +362,7 @@ Save writes `CardioLog` and finishes the session.
 **Files:** `src/features/history/{HistoryList,SessionDetail}.tsx`(+tests), `src/db/repos/history.ts`(+test)
 **Scope:** M
 
-### - [ ] T20: Exercise progress chart
+### - [x] T20: Exercise progress chart
 **Module:** `history`
 **Description:** An exercise picker (every exercise with logs, including custom ones) opens a chart of the top-set weight per session. A toggle switches to "best reps at top weight". Ramp-up sessions are shaded. Assistance exercises are labeled "lower is better".
 
