@@ -47,7 +47,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 - [x] T1: Scaffold project and tooling
 - [x] T2: PWA shell, offline caching, navigation, theme
 - [ ] T3: Deploy to GitHub Pages and install on iPhone
-- [ ] T4: Date helpers, Dexie schema, seed-once loading
+- [x] T4: Date helpers, Dexie schema, seed-once loading
 
 **Checkpoint A:** `npm run check` green · installs on iPhone · cold start works in airplane mode · seed visible in IndexedDB
 

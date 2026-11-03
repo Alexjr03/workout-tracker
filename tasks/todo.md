@@ -62,7 +62,7 @@ Decided 2026-11-03: **public** repo `workout-tracker` on GitHub account **Alexjr
 **Files:** `.github/workflows/deploy.yml`, `vite.config.ts`
 **Scope:** S
 
-### - [ ] T4: Date helpers, Dexie schema, seed-once loading
+### - [x] T4: Date helpers, Dexie schema, seed-once loading
 **Module:** `data-store`
 **Description:**
 - Add `src/domain/dates.ts`: local `YYYY-MM-DD`, `addDays`, weekday name, days between.

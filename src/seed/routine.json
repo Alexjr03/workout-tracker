@@ -1,0 +1,77 @@
+{
+  "settings": {
+    "units": { "liftWeight": "lb", "bodyWeight": "kg" },
+    "rampUpWeeks": 2,
+    "restSeconds": { "compound": 150, "isolation": 75 },
+    "calorieMax": 1500,
+    "goalWeightKg": 70,
+    "startingWeightKg": 88
+  },
+  "startingLoads": {
+    "bench-press": { "value": 10, "basis": "lb per side" }
+  },
+  "schedule": {
+    "monday": "upper-a",
+    "tuesday": "legs",
+    "wednesday": "upper-b",
+    "thursday": "cardio",
+    "friday": "shoulders-arms",
+    "saturday": "rest",
+    "sunday": "rest"
+  },
+  "sessions": {
+    "upper-a": {
+      "name": "Upper A",
+      "exercises": [
+        { "id": "bench-press", "name": "Bench press", "type": "compound", "sets": 3, "repMin": 8, "repMax": 10 },
+        { "id": "machine-row", "name": "Chest-supported or machine row", "type": "compound", "sets": 3, "repMin": 8, "repMax": 10 },
+        { "id": "lat-pulldown", "name": "Lat pulldown", "type": "compound", "sets": 3, "repMin": 8, "repMax": 12 },
+        { "id": "db-shoulder-press", "name": "Seated dumbbell shoulder press", "type": "compound", "sets": 3, "repMin": 8, "repMax": 10 },
+        { "id": "lateral-raise", "name": "Lateral raise", "type": "isolation", "sets": 2, "repMin": 12, "repMax": 15 },
+        { "id": "triceps-pushdown", "name": "Triceps pushdown", "type": "isolation", "sets": 2, "repMin": 10, "repMax": 12 }
+      ]
+    },
+    "legs": {
+      "name": "Legs",
+      "exercises": [
+        { "id": "squat", "name": "Back squat or Smith machine squat", "type": "compound", "sets": 3, "repMin": 6, "repMax": 8 },
+        { "id": "romanian-deadlift", "name": "Romanian deadlift", "type": "compound", "sets": 3, "repMin": 8, "repMax": 10 },
+        { "id": "leg-press", "name": "Leg press", "type": "compound", "sets": 3, "repMin": 10, "repMax": 12 },
+        { "id": "seated-leg-curl", "name": "Seated leg curl", "type": "isolation", "sets": 3, "repMin": 10, "repMax": 12 },
+        { "id": "leg-extension", "name": "Leg extension", "type": "isolation", "sets": 2, "repMin": 12, "repMax": 15 },
+        { "id": "calf-raise", "name": "Calf raise", "type": "isolation", "sets": 3, "repMin": 10, "repMax": 15 }
+      ]
+    },
+    "upper-b": {
+      "name": "Upper B",
+      "exercises": [
+        { "id": "incline-db-press", "name": "Incline dumbbell press", "type": "compound", "sets": 3, "repMin": 8, "repMax": 10 },
+        { "id": "assisted-pull-up", "name": "Assisted pull-up", "type": "compound", "sets": 3, "repMin": 8, "repMax": 10 },
+        { "id": "seated-cable-row", "name": "Seated cable row", "type": "compound", "sets": 3, "repMin": 10, "repMax": 12 },
+        { "id": "cable-fly", "name": "Cable fly", "type": "isolation", "sets": 2, "repMin": 12, "repMax": 15 },
+        { "id": "lateral-raise", "name": "Lateral raise", "type": "isolation", "sets": 2, "repMin": 12, "repMax": 15 },
+        { "id": "db-curl", "name": "Dumbbell curl", "type": "isolation", "sets": 3, "repMin": 10, "repMax": 12 }
+      ]
+    },
+    "cardio": {
+      "name": "Cardio",
+      "cardio": {
+        "machineOptions": ["Incline treadmill", "StairMaster"],
+        "minMinutes": 30,
+        "maxMinutes": 45,
+        "intensity": "Pace where I can still talk"
+      }
+    },
+    "shoulders-arms": {
+      "name": "Shoulders and arms",
+      "targetMinutes": "30-40",
+      "exercises": [
+        { "id": "machine-shoulder-press", "name": "Machine shoulder press", "type": "compound", "sets": 3, "repMin": 10, "repMax": 12 },
+        { "id": "lateral-raise", "name": "Lateral raise", "type": "isolation", "sets": 3, "repMin": 12, "repMax": 15 },
+        { "id": "face-pull", "name": "Face pull", "type": "isolation", "sets": 3, "repMin": 12, "repMax": 15 },
+        { "id": "hammer-curl", "name": "Hammer curl", "type": "isolation", "sets": 3, "repMin": 10, "repMax": 12 },
+        { "id": "overhead-triceps-extension", "name": "Overhead triceps extension", "type": "isolation", "sets": 3, "repMin": 10, "repMax": 12 }
+      ]
+    }
+  }
+}

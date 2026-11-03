@@ -66,7 +66,7 @@ None of these block a task. Promote any of them to the table above, with a tool,
 
 | Metric | Today | Direction |
 |---|---|---|
-| Production JS (gzipped) | 66.3 KB at T1 (React only) | must stay ≤ 250 KB (checked at T23) |
+| Production JS (gzipped) | 138.7 KB at T4 (React, router, Dexie, zod, workbox); 66.3 KB at T1 | must stay ≤ 250 KB (checked at T23) |
 
 ## Exceptions
 
