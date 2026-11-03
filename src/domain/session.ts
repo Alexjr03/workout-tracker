@@ -15,6 +15,22 @@ export function nextExerciseIndex(
   return next ? next[0] : slots.length;
 }
 
+interface SetCounts {
+  prescribedSets: number;
+  optionalSets: number;
+  optionalSkipped: boolean;
+}
+
+/** Sets that must be done; an optional ramp-up set may be skipped. */
+export function requiredSets(slot: Omit<SetCounts, 'optionalSkipped'>): number {
+  return slot.prescribedSets - slot.optionalSets;
+}
+
+/** Sets the runner still aims for: every set, unless the optional one was skipped. */
+export function targetSets(slot: SetCounts): number {
+  return slot.optionalSkipped ? requiredSets(slot) : slot.prescribedSets;
+}
+
 const BASIS_LABELS: Record<LoadBasis, string> = {
   'per-side': 'lb/side',
   'per-dumbbell': 'lb each',

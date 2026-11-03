@@ -373,8 +373,13 @@ button[aria-pressed='true'] {
   padding: 10px 12px;
 }
 
-.runner-undo {
-  align-self: flex-start;
+.runner-secondary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.runner-secondary button {
   color: var(--text-dim);
 }
 

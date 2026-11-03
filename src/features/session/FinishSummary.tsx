@@ -35,6 +35,7 @@ async function load(sessionId: string): Promise<Loaded | null> {
       {
         def,
         prescribedSets: slot.prescribedSets,
+        optionalSets: slot.optionalSets,
         repMax: slot.repMax,
         sets: sets.filter((s) => s.sessionExerciseId === slot.id),
       },

@@ -315,3 +315,65 @@ describe('SessionRunner: swap', () => {
     expect(screen.queryByRole('button', { name: 'Swap' })).not.toBeInTheDocument();
   });
 });
+
+describe('SessionRunner: optional ramp-up set', () => {
+  const RAMP = new Date(2026, 10, 9, 18); // Monday, ramp-up week 2
+
+  async function doRequiredBenchSets() {
+    const id = await startSession(db, 'upper-a', RAMP);
+    const [bench] = await slotsOf(id);
+    if (!bench) throw new Error('fixture');
+    await completeSet(db, { slot: bench, weight: 10, reps: 10 });
+    await completeSet(db, { slot: bench, weight: 10, reps: 10 });
+    return id;
+  }
+
+  it('shows every set, with the last one optional and skippable', async () => {
+    await startSession(db, 'upper-a', RAMP);
+    renderRunner();
+    expect(await screen.findByText('Set 1 of 3')).toBeInTheDocument();
+    expect(screen.getByText('8–10 reps · leave ~3 reps in reserve')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Skip last set' })).not.toBeInTheDocument();
+  });
+
+  it('skips the optional set and moves to the next exercise', async () => {
+    const id = await doRequiredBenchSets();
+    renderRunner();
+    expect(await screen.findByText('Set 3 of 3 · optional')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Skip last set' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Chest-supported or machine row' }),
+    ).toBeInTheDocument();
+    const [bench] = await slotsOf(id);
+    expect(bench?.optionalSkipped).toBe(true);
+    expect(await db.sets.where('sessionId').equals(id).count()).toBe(2);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Overview' }));
+    const list = screen.getByRole('list', { name: 'Exercises' });
+    expect(within(list).getAllByRole('button')[0]).toHaveTextContent('Bench press2/2');
+  });
+
+  it('can still do the optional set', async () => {
+    await doRequiredBenchSets();
+    renderRunner();
+    await screen.findByText('Set 3 of 3 · optional');
+    await userEvent.click(completeButton());
+    expect(
+      await screen.findByRole('heading', { name: 'Chest-supported or machine row' }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not count optional sets as missing when finishing', async () => {
+    const id = await startSession(db, 'upper-a', RAMP);
+    for (const slot of await slotsOf(id)) {
+      for (let i = 0; i < slot.prescribedSets - slot.optionalSets; i++) {
+        await completeSet(db, { slot, weight: 20, reps: 10 });
+      }
+    }
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Overview' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Finish session' }));
+    expect(await screen.findByRole('heading', { name: `Summary ${id}` })).toBeInTheDocument();
+  });
+});

@@ -42,6 +42,14 @@ test('runner fits on a 375×667 screen with Complete set in the thumb zone', asy
   const after = await page.getByRole('button', { name: 'Complete set' }).boundingBox();
   expect((after?.y ?? 0) + (after?.height ?? 0)).toBeLessThanOrEqual(667);
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(667);
+
+  // Ramp-up (program starts today): the last set is optional, with Skip next to Undo.
+  await page.getByRole('button', { name: 'Complete set' }).click();
+  await expect(page.getByText('Set 3 of 3 · optional')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Skip last set' })).toBeVisible();
+  const optional = await page.getByRole('button', { name: 'Complete set' }).boundingBox();
+  expect((optional?.y ?? 0) + (optional?.height ?? 0)).toBeLessThanOrEqual(667);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(667);
 });
 
 test('a completed set survives a reload', async ({ page }) => {

@@ -22,7 +22,7 @@ The routine itself (schedule, sessions, exercises, sets, rep ranges, rest times,
 5. **Units are fixed in v1:** lifts in lb, body weight in kg. No unit conversion.
 6. **Rest timer alerts only fire while the app is open** (an iOS PWA limitation). The timer is based on timestamps, so it shows the correct remaining time after you switch apps and come back.
 7. **Hosting:** the app must be served over HTTPS once so the iPhone can install it. GitHub Pages is assumed (see Open Questions).
-8. **"Every prescribed set"** means the ramp-adjusted set count that was shown in that session.
+8. **"Every prescribed set"** means the required sets shown in that session; an optional ramp-up set that was skipped doesn't count against progression.
 
 ## Capability Map
 
@@ -166,6 +166,8 @@ interface SessionExerciseLog {       // one per exercise slot in a session
   exerciseId: string;               // the exercise actually performed
   replacesExerciseId: string | null;  // set when swapped
   prescribedSets: number; repMin: number; repMax: number;
+  optionalSets: number;             // ramp-up: last set may be skipped (0 or 1)
+  optionalSkipped: boolean;         // the user tapped Skip last set
   rirTarget: '~3' | '1-2';
   suggestedWeight: number | null;   // progression suggestion shown, if any
 }
@@ -211,8 +213,9 @@ Pure domain functions with full unit test coverage:
 
 - **`sessionForDate(date, routine)`** returns the template id for that weekday or `'rest'`.
 - **`prescriptionFor(template exercise, date, settings)`** returns:
-  - Ramp-up applies while `date < programStartDate + rampUpWeeks × 7 days` (days 0–13 by default). During ramp-up, `sets = max(1, sets − 1)` and `rirTarget = '~3'`.
-  - Otherwise, `sets` is unchanged and `rirTarget = '1-2'`.
+  - Ramp-up applies while `date < programStartDate + rampUpWeeks × 7 days` (days 0–13 by default). During ramp-up, all sets are prescribed, but **the last set is optional** (`optionalSets = 1` when `sets > 1`, else 0), and `rirTarget = '~3'`. *(Changed 2026-11-03 at the owner's request; it was `sets − 1`.)*
+  - Otherwise, `sets` is unchanged, `optionalSets = 0` and `rirTarget = '1-2'`.
+  - Required sets = `sets − optionalSets`. The runner offers **Skip last set** on an optional set; a skipped set never counts as missing. Jumping back to that exercise from Overview makes the set available again.
   - Displayed as "3 sets × 8–10 reps · leave ~3 reps in reserve" / "leave 1–2 reps in reserve".
 - **`defaultWeight(exerciseId)`** checks these sources in order:
   1. The weight of the previous set in the current session for that exercise.
@@ -225,8 +228,8 @@ Pure domain functions with full unit test coverage:
   2. `repMax`.
 - **`progressionSuggestion(exerciseId)`** looks at the most recent finished session that contains this exerciseId.
   - It suggests `base + increment` when **all** these are true:
-    - Every prescribed set was logged.
-    - Each set had `reps ≥ repMax` for that session's prescription.
+    - Every required set was logged (an optional ramp-up set may be skipped).
+    - Each logged prescribed set, including an optional one if done, had `reps ≥ repMax`.
   - `base` is the lowest weight used across those sets.
   - For `assistance` exercises, it suggests `base − increment`, and never below 0.
   - Otherwise, it returns `null`.
@@ -346,6 +349,7 @@ import type { Settings, TemplateExercise } from '../db/schema';
 
 export interface Prescription {
   sets: number;
+  optionalSets: number;
   repMin: number;
   repMax: number;
   rirTarget: '~3' | '1-2';
@@ -360,7 +364,8 @@ export function prescriptionFor(
   const rampUpEnds = addDays(settings.programStartDate, settings.rampUpWeeks * 7);
   const rampUp = date < rampUpEnds;
   return {
-    sets: rampUp ? Math.max(1, exercise.sets - 1) : exercise.sets,
+    sets: exercise.sets,
+    optionalSets: rampUp && exercise.sets > 1 ? 1 : 0,
     repMin: exercise.repMin,
     repMax: exercise.repMax,
     rirTarget: rampUp ? '~3' : '1-2',
@@ -373,7 +378,7 @@ export function prescriptionFor(
 
 | Level | Tool | Covers |
 |---|---|---|
-| Unit | Vitest | Everything in `src/domain/` at **100% branch coverage**: ramp-up boundaries (day 13 vs 14, 1-set exercise stays 1), progression (all-max, one short, missing set, mixed weights, assistance, bench +2.5), default-weight priority, 7-day average gaps, schedule lookup |
+| Unit | Vitest | Everything in `src/domain/` at **100% branch coverage**: ramp-up boundaries (day 13 vs 14, last set optional, 1-set exercise has nothing optional), skipping the optional set still allows progression, progression (all-max, one short, missing set, mixed weights, assistance, bench +2.5), default-weight priority, 7-day average gaps, schedule lookup |
 | Integration | Vitest + `fake-indexeddb` | Repos, seeding runs once, set write durability, swap history separation, export→import round trip, invalid import leaves data untouched |
 | Component | Vitest + RTL | Steppers, session runner advancing, timer adjust/skip with fake timers |
 | E2E | Playwright (WebKit, iPhone 13 viewport) | Full Upper A session; reload mid-session restores state; offline cold start via `context.setOffline(true)`; cardio log; body weight + chart; calorie over-max state; backup round trip |
@@ -406,7 +411,7 @@ Overall line coverage target: ≥ 80%. Tests are written before or alongside eac
 
 1. Installed on iPhone from the Home Screen, the app cold-starts and is fully usable in airplane mode.
 2. On a Monday after the ramp-up window, Today shows **Upper A**. The Bench press card shows "3 sets × 8–10 · leave 1–2 reps in reserve" with a weight of 10 lb/side on first use.
-3. On day 0–13 after the program start date, every exercise shows `sets − 1` (min 1) and "~3 reps in reserve". On day 14, normal sets and "1–2" are shown.
+3. On day 0–13 after the program start date, every exercise shows its full sets with the last one marked optional (Skip last set), and "~3 reps in reserve". On day 14, normal sets with nothing optional and "1–2" are shown.
 4. Completing a set takes **≤ 2 taps** when the defaults are correct (Complete set → timer runs → Complete set …).
 5. Force-quitting the app right after tapping **Complete set**, then reopening, shows that set saved and resumes at the next set.
 6. A compound set starts a 2:30 timer and an isolation set starts a 1:15 timer. ±15 s and Skip work, and the timer is correct after locking the phone for 60 s.

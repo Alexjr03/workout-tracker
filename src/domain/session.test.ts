@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadBasisLabel, nextExerciseIndex } from './session';
+import { loadBasisLabel, nextExerciseIndex, requiredSets, targetSets } from './session';
 
 const slots = [{ prescribedSets: 3 }, { prescribedSets: 2 }, { prescribedSets: 1 }];
 
@@ -40,5 +40,21 @@ describe('loadBasisLabel', () => {
     expect(loadBasisLabel('per-dumbbell')).toBe('lb each');
     expect(loadBasisLabel('total')).toBe('lb');
     expect(loadBasisLabel('assistance')).toBe('lb assist');
+  });
+});
+
+describe('requiredSets / targetSets', () => {
+  const rampUp = { prescribedSets: 3, optionalSets: 1, optionalSkipped: false };
+
+  it('counts the optional last set as a target until it is skipped', () => {
+    expect(requiredSets(rampUp)).toBe(2);
+    expect(targetSets(rampUp)).toBe(3);
+    expect(targetSets({ ...rampUp, optionalSkipped: true })).toBe(2);
+  });
+
+  it('treats everything as required when nothing is optional', () => {
+    const normal = { prescribedSets: 3, optionalSets: 0, optionalSkipped: false };
+    expect(requiredSets(normal)).toBe(3);
+    expect(targetSets(normal)).toBe(3);
   });
 });

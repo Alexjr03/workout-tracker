@@ -2,11 +2,17 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { saveDraft } from '../../db/repos/activeSession';
 import { finishSession } from '../../db/repos/sessions';
-import { completeSet, jumpToExercise, setRestEndsAt, undoLastSet } from '../../db/repos/sets';
+import {
+  completeSet,
+  jumpToExercise,
+  setRestEndsAt,
+  skipOptionalSet,
+  undoLastSet,
+} from '../../db/repos/sets';
 import { db } from '../../db/schema';
 import { defaultReps, defaultWeight } from '../../domain/defaults';
 import { rirText } from '../../domain/rampUp';
-import { loadBasisLabel } from '../../domain/session';
+import { loadBasisLabel, requiredSets, targetSets } from '../../domain/session';
 import { Stepper } from '../../ui/Stepper';
 import { primeAudio, useWakeLock } from '../timer/alerts';
 import { RestTimerBar } from '../timer/RestTimerBar';
@@ -47,6 +53,8 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
   const [saving, setSaving] = useState(false);
   const [swapping, setSwapping] = useState(false);
   const unit = loadBasisLabel(def.loadBasis);
+  // Ramp-up: the last set may be skipped.
+  const optional = setIndex >= requiredSets(slot);
   const canComplete = weight !== null && reps !== null && reps >= 1 && !saving;
 
   function change(next: { weight: number | null; reps: number | null }) {
@@ -79,6 +87,7 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
         {swapping && <SwapSheet current={current} onClose={() => setSwapping(false)} />}
         <p className="runner-set">
           Set {setIndex + 1} of {slot.prescribedSets}
+          {optional && ' · optional'}
         </p>
         <p className="muted">
           {slot.repMin}–{slot.repMax} reps · {rirText(slot.rirTarget)}
@@ -105,10 +114,19 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
         value={reps}
         onChange={(r) => change({ weight, reps: r })}
       />
-      {canUndo && (
-        <button type="button" className="runner-undo" onClick={onUndo}>
-          Undo last set
-        </button>
+      {(canUndo || optional) && (
+        <div className="runner-secondary">
+          {canUndo && (
+            <button type="button" onClick={onUndo}>
+              Undo last set
+            </button>
+          )}
+          {optional && (
+            <button type="button" onClick={() => void skipOptionalSet(db, slot.id)}>
+              Skip last set
+            </button>
+          )}
+        </div>
       )}
 
       <div className="runner-action">
@@ -163,10 +181,10 @@ export function SessionRunner() {
   }
   const current = data.slots[data.exerciseIndex];
   const upNext = data.slots.find(
-    (s, i) => i > data.exerciseIndex && s.sets.length < s.slot.prescribedSets,
+    (s, i) => i > data.exerciseIndex && s.sets.length < targetSets(s.slot),
   );
   const setsMissing = data.slots.reduce(
-    (n, s) => n + Math.max(0, s.slot.prescribedSets - s.sets.length),
+    (n, s) => n + Math.max(0, requiredSets(s.slot) - s.sets.length),
     0,
   );
   const canUndo = data.slots.some((s) => s.sets.length > 0);

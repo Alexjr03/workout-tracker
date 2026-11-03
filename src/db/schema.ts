@@ -27,7 +27,7 @@ export type WorkoutDb = Dexie & {
 
 export function createDb(name = 'workout-tracker'): WorkoutDb {
   const db = new Dexie(name) as WorkoutDb;
-  // Version 1. Later versions add .upgrade() migrations; never drop user data.
+  // Every version keeps the data of the one before; upgrades only add or fill fields.
   db.version(1).stores({
     settings: 'id',
     routine: 'id',
@@ -40,6 +40,16 @@ export function createDb(name = 'workout-tracker'): WorkoutDb {
     food: 'id, date',
     activeSession: 'id',
   });
+  // v2: ramp-up keeps every set with the last one optional. Older slots had nothing optional.
+  db.version(2).upgrade((tx) =>
+    tx
+      .table('sessionExercises')
+      .toCollection()
+      .modify((slot: Partial<SessionExerciseLog>) => {
+        slot.optionalSets ??= 0;
+        slot.optionalSkipped ??= false;
+      }),
+  );
   return db;
 }
 

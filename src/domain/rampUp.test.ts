@@ -17,9 +17,10 @@ const bench: TemplateExercise = {
 const oneSet: TemplateExercise = { ...bench, id: 'one', sets: 1 };
 
 describe('prescriptionFor', () => {
-  it('drops one set and targets ~3 reps in reserve on day 0', () => {
+  it('keeps every set, makes the last optional and targets ~3 RIR on day 0', () => {
     expect(prescriptionFor(bench, START, settings)).toEqual({
-      sets: 2,
+      sets: 3,
+      optionalSets: 1,
       repMin: 8,
       repMax: 10,
       rirTarget: '~3',
@@ -29,15 +30,17 @@ describe('prescriptionFor', () => {
 
   it('is still ramp-up on day 13', () => {
     expect(prescriptionFor(bench, addDays(START, 13), settings)).toMatchObject({
-      sets: 2,
+      sets: 3,
+      optionalSets: 1,
       rirTarget: '~3',
       rampUp: true,
     });
   });
 
-  it('switches to full sets and 1-2 reps in reserve on day 14', () => {
+  it('makes every set required and targets 1-2 reps in reserve on day 14', () => {
     expect(prescriptionFor(bench, addDays(START, 14), settings)).toEqual({
       sets: 3,
+      optionalSets: 0,
       repMin: 8,
       repMax: 10,
       rirTarget: '1-2',
@@ -45,8 +48,8 @@ describe('prescriptionFor', () => {
     });
   });
 
-  it('never goes below 1 set', () => {
-    expect(prescriptionFor(oneSet, START, settings).sets).toBe(1);
+  it('makes nothing optional for a 1-set exercise', () => {
+    expect(prescriptionFor(oneSet, START, settings)).toMatchObject({ sets: 1, optionalSets: 0 });
   });
 
   it('treats dates before the start as ramp-up', () => {
@@ -55,7 +58,11 @@ describe('prescriptionFor', () => {
 
   it('skips ramp-up entirely when rampUpWeeks is 0', () => {
     const none = { programStartDate: START, rampUpWeeks: 0 };
-    expect(prescriptionFor(bench, START, none)).toMatchObject({ sets: 3, rampUp: false });
+    expect(prescriptionFor(bench, START, none)).toMatchObject({
+      sets: 3,
+      optionalSets: 0,
+      rampUp: false,
+    });
     expect(prescriptionFor(bench, addDays(START, -1), none).rampUp).toBe(false);
   });
 

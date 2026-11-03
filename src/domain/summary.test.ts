@@ -16,6 +16,7 @@ describe('sessionSummary', () => {
         {
           def: bench,
           prescribedSets: 3,
+          optionalSets: 0,
           repMax: 10,
           sets: sets([
             [10, 10],
@@ -26,6 +27,7 @@ describe('sessionSummary', () => {
         {
           def: row,
           prescribedSets: 3,
+          optionalSets: 0,
           repMax: 10,
           sets: sets([
             [50, 10],
@@ -42,12 +44,47 @@ describe('sessionSummary', () => {
     });
   });
 
+  it('counts an optional set only when it was done', () => {
+    const summary = sessionSummary({
+      startedAt: '2026-11-23T18:00:00.000Z',
+      finishedAt: '2026-11-23T18:30:00.000Z',
+      exercises: [
+        {
+          def: bench,
+          prescribedSets: 3,
+          optionalSets: 1,
+          repMax: 10,
+          sets: sets([
+            [10, 10],
+            [10, 10],
+          ]),
+        },
+        {
+          def: row,
+          prescribedSets: 3,
+          optionalSets: 1,
+          repMax: 10,
+          sets: sets([
+            [50, 9],
+            [50, 9],
+            [50, 8],
+          ]),
+        },
+      ],
+    });
+    expect(summary).toMatchObject({
+      setsDone: 5,
+      setsPrescribed: 5,
+      progressions: [{ name: 'Bench press', next: 12.5, loadBasis: 'per-side' }],
+    });
+  });
+
   it('handles a session with nothing logged', () => {
     expect(
       sessionSummary({
         startedAt: '2026-11-23T18:00:00.000Z',
         finishedAt: '2026-11-23T18:00:20.000Z',
-        exercises: [{ def: row, prescribedSets: 3, repMax: 10, sets: [] }],
+        exercises: [{ def: row, prescribedSets: 3, optionalSets: 0, repMax: 10, sets: [] }],
       }),
     ).toEqual({ setsDone: 0, setsPrescribed: 3, minutes: 0, progressions: [] });
   });

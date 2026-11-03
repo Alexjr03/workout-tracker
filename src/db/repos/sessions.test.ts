@@ -32,14 +32,15 @@ describe('startSession', () => {
     });
 
     const slots = await db.sessionExercises.where('sessionId').equals(id).sortBy('order');
-    expect(slots.map((s) => [s.exerciseId, s.prescribedSets])).toEqual([
-      ['bench-press', 2],
-      ['machine-row', 2],
-      ['lat-pulldown', 2],
-      ['db-shoulder-press', 2],
-      ['lateral-raise', 1],
-      ['triceps-pushdown', 1],
+    expect(slots.map((s) => [s.exerciseId, s.prescribedSets, s.optionalSets])).toEqual([
+      ['bench-press', 3, 1],
+      ['machine-row', 3, 1],
+      ['lat-pulldown', 3, 1],
+      ['db-shoulder-press', 3, 1],
+      ['lateral-raise', 2, 1],
+      ['triceps-pushdown', 2, 1],
     ]);
+    expect(slots.every((s) => !s.optionalSkipped)).toBe(true);
     expect(slots.every((s) => s.rirTarget === '~3' && s.replacesExerciseId === null)).toBe(true);
     expect(slots[0]).toMatchObject({ repMin: 8, repMax: 10, suggestedWeight: null });
   });
@@ -47,7 +48,7 @@ describe('startSession', () => {
   it('uses full sets and 1–2 RIR after ramp-up', async () => {
     const id = await startSession(db, 'upper-a', MON_AFTER);
     const slots = await db.sessionExercises.where('sessionId').equals(id).sortBy('order');
-    expect(slots[0]).toMatchObject({ prescribedSets: 3, rirTarget: '1-2' });
+    expect(slots[0]).toMatchObject({ prescribedSets: 3, optionalSets: 0, rirTarget: '1-2' });
     expect((await db.sessions.get(id))?.rampUp).toBe(false);
   });
 

@@ -7,6 +7,7 @@ interface SummaryInput {
   exercises: {
     def: Pick<ExerciseDef, 'name' | 'loadBasis' | 'increment'>;
     prescribedSets: number;
+    optionalSets: number;
     repMax: number;
     sets: { setIndex: number; weight: number; reps: number }[];
   }[];
@@ -14,6 +15,7 @@ interface SummaryInput {
 
 export interface SessionSummary {
   setsDone: number;
+  /** Required sets, plus optional ones only if they were done. */
   setsPrescribed: number;
   minutes: number;
   /** Exercises whose next session will suggest a new weight. */
@@ -22,23 +24,18 @@ export interface SessionSummary {
 
 export function sessionSummary(input: SummaryInput): SessionSummary {
   const progressions: SessionSummary['progressions'] = [];
+  let setsPrescribed = 0;
   for (const e of input.exercises) {
-    const next = progressionSuggestion(
-      [
-        {
-          finishedAt: input.finishedAt,
-          prescribedSets: e.prescribedSets,
-          repMax: e.repMax,
-          sets: e.sets,
-        },
-      ],
-      e.def,
-    );
+    const next = progressionSuggestion([{ ...e, finishedAt: input.finishedAt }], e.def);
     if (next !== null) progressions.push({ name: e.def.name, next, loadBasis: e.def.loadBasis });
+
+    const required = e.prescribedSets - e.optionalSets;
+    const optionalDone = Math.min(e.prescribedSets, e.sets.length) - required;
+    setsPrescribed += required + Math.max(0, optionalDone);
   }
   return {
     setsDone: input.exercises.reduce((n, e) => n + e.sets.length, 0),
-    setsPrescribed: input.exercises.reduce((n, e) => n + e.prescribedSets, 0),
+    setsPrescribed,
     minutes: Math.round((Date.parse(input.finishedAt) - Date.parse(input.startedAt)) / 60_000),
     progressions,
   };

@@ -4,6 +4,8 @@ import type { ExerciseDef } from '../db/types';
 export interface ExerciseHistoryEntry {
   finishedAt: string;
   prescribedSets: number;
+  /** Trailing sets that could be skipped (ramp-up). */
+  optionalSets: number;
   repMax: number;
   sets: { setIndex: number; weight: number; reps: number }[];
 }
@@ -12,7 +14,8 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Next session's suggested weight, or null. Looks only at the most recent session: every
- * prescribed set must be logged with reps ≥ repMax. Builds on the lowest weight used.
+ * required set must be logged, and every prescribed set that was logged (an optional one
+ * included) must reach repMax. Builds on the lowest weight used.
  * Assistance exercises progress by removing assistance, never below 0.
  */
 export function progressionSuggestion(
@@ -25,9 +28,10 @@ export function progressionSuggestion(
   );
   if (!latest) return null;
 
+  const required = latest.prescribedSets - latest.optionalSets;
   const prescribed = latest.sets.filter((s) => s.setIndex < latest.prescribedSets);
   const indexes = new Set(prescribed.map((s) => s.setIndex));
-  if (indexes.size < latest.prescribedSets) return null;
+  for (let i = 0; i < required; i++) if (!indexes.has(i)) return null;
   if (prescribed.some((s) => s.reps < latest.repMax)) return null;
 
   const base = Math.min(...prescribed.map((s) => s.weight));

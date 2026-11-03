@@ -25,6 +25,7 @@ export async function exerciseHistory(
     entries.push({
       finishedAt: session.finishedAt,
       prescribedSets: slot.prescribedSets,
+      optionalSets: slot.optionalSets,
       repMax: slot.repMax,
       sets,
     });
@@ -91,6 +92,8 @@ export async function startSession(db: WorkoutDb, templateId: string, now = new 
           exerciseId: exercise.id,
           replacesExerciseId: null,
           prescribedSets: p.sets,
+          optionalSets: p.optionalSets,
+          optionalSkipped: false,
           repMin: p.repMin,
           repMax: p.repMax,
           rirTarget: p.rirTarget,

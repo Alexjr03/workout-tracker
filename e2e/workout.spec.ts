@@ -37,8 +37,8 @@ test('complete a full Upper A session with rest timers and finish', async ({ pag
   await expect(page.getByText('All sets done.')).toBeVisible();
   await page.getByRole('button', { name: 'Finish session' }).click();
   await expect(page.getByRole('heading', { name: 'Upper A done' })).toBeVisible();
-  // Program starts today, so this is ramp-up: 2+2+2+2+1+1 sets.
-  await expect(page.getByText(/^10 of 10 sets · \d+ min$/)).toBeVisible();
+  // Program starts today, so this is ramp-up: every set (3+3+3+3+2+2), last ones optional but done.
+  await expect(page.getByText(/^16 of 16 sets · \d+ min$/)).toBeVisible();
   await page.getByRole('button', { name: 'Done' }).click();
   await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Resume/ })).toHaveCount(0);

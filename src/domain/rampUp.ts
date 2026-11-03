@@ -3,6 +3,8 @@ import { addDays, type LocalDate } from './dates';
 
 export interface Prescription {
   sets: number;
+  /** Trailing sets that may be skipped without counting as missed. */
+  optionalSets: number;
   repMin: number;
   repMax: number;
   rirTarget: RirTarget;
@@ -11,7 +13,8 @@ export interface Prescription {
 
 /**
  * What to show for an exercise on `date`. During the first `rampUpWeeks` weeks after the
- * program start: one fewer set (minimum 1) and ~3 reps in reserve; afterwards 1–2.
+ * program start: every set, with the last one optional, and ~3 reps in reserve; afterwards
+ * every set required and 1–2.
  */
 export function prescriptionFor(
   exercise: Pick<TemplateExercise, 'sets' | 'repMin' | 'repMax'>,
@@ -21,7 +24,8 @@ export function prescriptionFor(
   const rampUpEnds = addDays(settings.programStartDate, settings.rampUpWeeks * 7);
   const rampUp = settings.rampUpWeeks > 0 && date < rampUpEnds;
   return {
-    sets: rampUp ? Math.max(1, exercise.sets - 1) : exercise.sets,
+    sets: exercise.sets,
+    optionalSets: rampUp && exercise.sets > 1 ? 1 : 0,
     repMin: exercise.repMin,
     repMax: exercise.repMax,
     rirTarget: rampUp ? '~3' : '1-2',

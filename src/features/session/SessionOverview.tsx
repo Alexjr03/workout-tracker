@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { updateSet } from '../../db/repos/sets';
 import { db } from '../../db/schema';
 import type { SetLog } from '../../db/types';
-import { loadBasisLabel } from '../../domain/session';
+import { loadBasisLabel, targetSets } from '../../domain/session';
 import { Stepper } from '../../ui/Stepper';
 import type { RunnerData, RunnerSlot } from './useRunnerData';
 
@@ -64,7 +64,7 @@ export function SessionOverview({ data, onPick, onFinish }: SessionOverviewProps
             >
               {item.def.name}
               <span>
-                {item.sets.length}/{item.slot.prescribedSets}
+                {item.sets.length}/{targetSets(item.slot)}
               </span>
             </button>
             {item.sets.length > 0 && (

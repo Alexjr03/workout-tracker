@@ -3,7 +3,14 @@ import { resetDb } from '../../test/db';
 import { db } from '../schema';
 import type { SessionExerciseLog } from '../types';
 import { startSession } from './sessions';
-import { completeSet, jumpToExercise, lastTimeSets, lastWeightFor, setRestEndsAt } from './sets';
+import {
+  completeSet,
+  jumpToExercise,
+  lastTimeSets,
+  lastWeightFor,
+  setRestEndsAt,
+  skipOptionalSet,
+} from './sets';
 
 const MON = new Date(2026, 10, 23, 18); // after ramp-up: 3 sets of bench
 let sessionId: string;
@@ -122,5 +129,60 @@ describe('lastWeightFor / lastTimeSets', () => {
     expect(await lastTimeSets(db, 'bench-press')).toEqual([
       expect.objectContaining({ setIndex: 0, weight: 10, reps: 10 }),
     ]);
+  });
+});
+
+describe('optional ramp-up set', () => {
+  const RAMP = new Date(2026, 10, 9, 18); // Monday in ramp-up: last set optional
+
+  async function rampSession() {
+    await db.activeSession.clear();
+    await db.sessions.where('status').equals('active').modify({ status: 'discarded' });
+    const id = await startSession(db, 'upper-a', RAMP);
+    return db.sessionExercises.where('sessionId').equals(id).sortBy('order');
+  }
+
+  it('stays on the exercise for its optional last set', async () => {
+    const [bench] = await rampSession();
+    if (!bench) throw new Error('fixture');
+    await completeSet(db, { slot: bench, weight: 10, reps: 10, now: RAMP });
+    await completeSet(db, { slot: bench, weight: 10, reps: 10, now: RAMP });
+    expect(await db.activeSession.get('active')).toMatchObject({ exerciseIndex: 0, setIndex: 2 });
+  });
+
+  it('skipping it moves on and marks the slot', async () => {
+    const [bench] = await rampSession();
+    if (!bench) throw new Error('fixture');
+    await completeSet(db, { slot: bench, weight: 10, reps: 10, now: RAMP });
+    await completeSet(db, { slot: bench, weight: 10, reps: 10, now: RAMP });
+    await db.activeSession.update('active', { draftWeight: 12.5 });
+
+    await skipOptionalSet(db, bench.id);
+    expect((await db.sessionExercises.get(bench.id))?.optionalSkipped).toBe(true);
+    expect(await db.activeSession.get('active')).toMatchObject({
+      exerciseIndex: 1,
+      setIndex: 0,
+      draftWeight: null,
+    });
+  });
+
+  it('refuses to skip before the required sets are done, or with nothing optional', async () => {
+    const [bench] = await rampSession();
+    if (!bench) throw new Error('fixture');
+    await expect(skipOptionalSet(db, bench.id)).rejects.toThrow('Only the optional last set');
+    await expect(skipOptionalSet(db, slot(0).id)).rejects.toThrow('Only the optional last set');
+    await expect(skipOptionalSet(db, 'nope')).rejects.toThrow('Unknown session exercise nope');
+  });
+
+  it('jumping back to a skipped exercise makes the optional set available again', async () => {
+    const [bench] = await rampSession();
+    if (!bench) throw new Error('fixture');
+    await completeSet(db, { slot: bench, weight: 10, reps: 10, now: RAMP });
+    await completeSet(db, { slot: bench, weight: 10, reps: 10, now: RAMP });
+    await skipOptionalSet(db, bench.id);
+
+    await jumpToExercise(db, bench.sessionId, 0);
+    expect((await db.sessionExercises.get(bench.id))?.optionalSkipped).toBe(false);
+    expect(await db.activeSession.get('active')).toMatchObject({ exerciseIndex: 0, setIndex: 2 });
   });
 });

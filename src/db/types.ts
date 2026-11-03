@@ -62,6 +62,10 @@ export interface SessionExerciseLog {
   exerciseId: string;
   replacesExerciseId: string | null;
   prescribedSets: number;
+  /** Trailing sets that may be skipped (ramp-up: 1, else 0). */
+  optionalSets: number;
+  /** The user chose Skip last set. */
+  optionalSkipped: boolean;
   repMin: number;
   repMax: number;
   rirTarget: RirTarget;

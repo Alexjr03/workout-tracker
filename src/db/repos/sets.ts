@@ -1,5 +1,5 @@
 import { Dexie } from 'dexie';
-import { nextExerciseIndex } from '../../domain/session';
+import { nextExerciseIndex, requiredSets, targetSets } from '../../domain/session';
 import { restEndsAt } from '../../domain/timer';
 import type { WorkoutDb } from '../schema';
 import type { SessionExerciseLog, SetLog } from '../types';
@@ -12,6 +12,14 @@ async function loggedCounts(db: WorkoutDb, sessionId: string) {
   ]);
   const counts = slots.map((s) => sets.filter((set) => set.sessionExerciseId === s.id).length);
   return { slots, counts };
+}
+
+/** Exercise index after a change, aiming at each slot's target (skipped optional sets excluded). */
+async function advance(db: WorkoutDb, sessionId: string, from: number) {
+  const { slots, counts } = await loggedCounts(db, sessionId);
+  const targets = slots.map((s) => ({ prescribedSets: targetSets(s) }));
+  const exerciseIndex = nextExerciseIndex(targets, counts, from);
+  return { exerciseIndex, setIndex: counts[exerciseIndex] ?? 0 };
 }
 
 /**
@@ -44,11 +52,8 @@ export async function completeSet(
     };
     await db.sets.add(set);
 
-    const { slots, counts } = await loggedCounts(db, slot.sessionId);
-    const exerciseIndex = nextExerciseIndex(slots, counts, slot.order);
     await db.activeSession.update('active', {
-      exerciseIndex,
-      setIndex: counts[exerciseIndex] ?? 0,
+      ...(await advance(db, slot.sessionId, slot.order)),
       draftWeight: null,
       draftReps: null,
       restEndsAt:
@@ -92,9 +97,34 @@ export async function updateSet(
   await db.sets.update(setId, values);
 }
 
+/**
+ * Skips an exercise's optional ramp-up set (only once its required sets are done) and moves on.
+ */
+export async function skipOptionalSet(db: WorkoutDb, slotId: string): Promise<void> {
+  await db.transaction('rw', db.sets, db.sessionExercises, db.activeSession, async () => {
+    const slot = await db.sessionExercises.get(slotId);
+    if (!slot) throw new Error(`Unknown session exercise ${slotId}`);
+    const logged = await db.sets.where('sessionExerciseId').equals(slotId).count();
+    if (slot.optionalSets === 0 || logged < requiredSets(slot)) {
+      throw new Error('Only the optional last set can be skipped');
+    }
+    await db.sessionExercises.update(slotId, { optionalSkipped: true });
+    await db.activeSession.update('active', {
+      ...(await advance(db, slot.sessionId, slot.order)),
+      draftWeight: null,
+      draftReps: null,
+    });
+  });
+}
+
+/** Points the runner at an exercise. A skipped optional set becomes available again. */
 export async function jumpToExercise(db: WorkoutDb, sessionId: string, exerciseIndex: number) {
   await db.transaction('rw', db.sets, db.sessionExercises, db.activeSession, async () => {
-    const { counts } = await loggedCounts(db, sessionId);
+    const { slots, counts } = await loggedCounts(db, sessionId);
+    const target = slots[exerciseIndex];
+    if (target?.optionalSkipped) {
+      await db.sessionExercises.update(target.id, { optionalSkipped: false });
+    }
     await db.activeSession.update('active', {
       exerciseIndex,
       setIndex: counts[exerciseIndex] ?? 0,

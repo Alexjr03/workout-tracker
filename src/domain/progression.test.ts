@@ -11,6 +11,7 @@ function entry(
   return {
     finishedAt: '2026-11-02T18:00:00.000Z',
     prescribedSets: 3,
+    optionalSets: 0,
     repMax: 10,
     sets: sets.map(([weight, reps], setIndex) => ({ setIndex, weight, reps })),
     ...opts,
@@ -118,6 +119,38 @@ describe('progressionSuggestion', () => {
     );
     expect(progressionSuggestion([newer, older], bench)).toBeNull();
     expect(progressionSuggestion([older, newer], bench)).toBeNull();
+  });
+
+  it('still suggests when the optional ramp-up set was skipped', () => {
+    const history = [
+      entry(
+        [
+          [10, 10],
+          [10, 10],
+        ],
+        { prescribedSets: 3, optionalSets: 1 },
+      ),
+    ];
+    expect(progressionSuggestion(history, bench)).toBe(12.5);
+  });
+
+  it('returns null when the optional set was done but fell short', () => {
+    const history = [
+      entry(
+        [
+          [10, 10],
+          [10, 10],
+          [10, 7],
+        ],
+        { prescribedSets: 3, optionalSets: 1 },
+      ),
+    ];
+    expect(progressionSuggestion(history, bench)).toBeNull();
+  });
+
+  it('returns null when a required set is missing even with an optional set', () => {
+    const history = [entry([[10, 10]], { prescribedSets: 3, optionalSets: 1 })];
+    expect(progressionSuggestion(history, bench)).toBeNull();
   });
 
   it('returns null with no history', () => {
