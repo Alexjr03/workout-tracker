@@ -629,3 +629,45 @@ button[aria-pressed='true'] {
   font-size: 15px;
   min-height: 1.4em;
 }
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-list a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 2px;
+  min-height: var(--tap-primary);
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.history-list .muted:first-child {
+  flex-basis: 100%;
+  font-size: 15px;
+}
+
+.history-name {
+  font-weight: 700;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+  color: var(--text);
+}

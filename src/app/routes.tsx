@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { HistoryList } from '../features/history/HistoryList';
+import { SessionDetailScreen } from '../features/history/SessionDetailScreen';
 import { FinishSummary } from '../features/session/FinishSummary';
 import { SessionRunner } from '../features/session/SessionRunner';
 import { CatalogEditor } from '../features/settings/routine/CatalogEditor';
@@ -20,7 +22,7 @@ function Placeholder({ title }: { title: string }) {
 
 export const TABS: Tab[] = [
   { path: '/', label: 'Today', element: <TodayScreen /> },
-  { path: '/history', label: 'History', element: <Placeholder title="History" /> },
+  { path: '/history', label: 'History', element: <HistoryList /> },
   { path: '/body', label: 'Body', element: <Placeholder title="Body" /> },
   { path: '/food', label: 'Food', element: <Placeholder title="Food" /> },
   { path: '/settings', label: 'Settings', element: <SettingsScreen /> },
@@ -30,6 +32,7 @@ export const TABS: Tab[] = [
 export const SCREENS: { path: string; element: ReactNode }[] = [
   { path: '/session', element: <SessionRunner /> },
   { path: '/summary/:sessionId', element: <FinishSummary /> },
+  { path: '/history/session/:sessionId', element: <SessionDetailScreen /> },
   { path: '/settings/schedule', element: <ScheduleEditor /> },
   { path: '/settings/exercises', element: <CatalogEditor /> },
   { path: '/settings/sessions/:templateId', element: <TemplateEditor /> },

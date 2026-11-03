@@ -346,7 +346,7 @@ Save writes `CardioLog` and finishes the session.
 **Files:** `src/ui/LineChart.tsx`(+test)
 **Scope:** S
 
-### - [ ] T19: History list and session detail
+### - [x] T19: History list and session detail
 **Module:** `history`
 **Description:**
 - The list shows finished sessions newest first: date, name, sets, duration (cardio shows machine + minutes). Swapped exercises are marked.
