@@ -50,7 +50,7 @@ Add `react-router` with 5 placeholder routes and a bottom tab bar. Add the high-
 **Module:** `app-shell`
 **Description:** Add a GitHub Actions workflow that builds and publishes `dist/` to Pages, and set the Vite `base` for the repo path. **Ask the user before creating the repo or pushing.**
 
-Decided 2026-11-03: **public** repo `workout-tracker` on GitHub account **Alexjr03** (the active `gh` account). URL: `https://alexjr03.github.io/workout-tracker/`, Vite `base: '/workout-tracker/'`.
+Deployed 2026-11-03 (live, verified loading + SW + seed). **Waiting on: iPhone install check by the owner.** Decided: **public** repo `workout-tracker` on GitHub account **Alexjr03** (the active `gh` account). URL: `https://alexjr03.github.io/workout-tracker/`, Vite `base: '/workout-tracker/'`.
 
 **Acceptance criteria:**
 - [ ] App is served over HTTPS at the Pages URL.
