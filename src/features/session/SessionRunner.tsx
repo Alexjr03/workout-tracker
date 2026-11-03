@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { saveDraft } from '../../db/repos/activeSession';
 import { finishSession } from '../../db/repos/sessions';
-import { completeSet, jumpToExercise, undoLastSet } from '../../db/repos/sets';
+import { completeSet, jumpToExercise, setRestEndsAt, undoLastSet } from '../../db/repos/sets';
 import { db } from '../../db/schema';
 import { defaultReps, defaultWeight } from '../../domain/defaults';
 import { rirText } from '../../domain/rampUp';
 import { loadBasisLabel } from '../../domain/session';
 import { Stepper } from '../../ui/Stepper';
+import { primeAudio, useWakeLock } from '../timer/alerts';
+import { RestTimerBar } from '../timer/RestTimerBar';
 import { SessionOverview } from './SessionOverview';
 import { useRunnerData, type RunnerData, type RunnerSlot } from './useRunnerData';
 
@@ -18,10 +20,11 @@ interface SetEntryProps {
   upNext: string | null;
   canUndo: boolean;
   onUndo: () => void;
+  restEndsAt: string | null;
 }
 
 /** One set's inputs. Re-keyed per set, so its state starts from that set's draft or defaults. */
-function SetEntry({ current, history, draft, upNext, canUndo, onUndo }: SetEntryProps) {
+function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt }: SetEntryProps) {
   const { slot, def, sets } = current;
   const setIndex = sets.length;
   const [weight, setWeight] = useState<number | null>(
@@ -51,6 +54,7 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo }: SetEntry
 
   async function complete() {
     if (weight === null || reps === null) return;
+    primeAudio(); // inside the tap, so iOS lets the timer beep later
     setSaving(true);
     // Awaited: the set is in IndexedDB before the next set renders.
     await completeSet(db, { slot, weight, reps });
@@ -95,6 +99,13 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo }: SetEntry
       )}
 
       <div className="runner-action">
+        {restEndsAt && (
+          <RestTimerBar
+            key={restEndsAt}
+            endsAt={restEndsAt}
+            onChange={(endsAt) => void setRestEndsAt(db, endsAt)}
+          />
+        )}
         {upNext && <p className="muted">Up next: {upNext}</p>}
         <button
           type="button"
@@ -114,6 +125,7 @@ export function SessionRunner() {
   const navigate = useNavigate();
   const [showOverview, setShowOverview] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
+  useWakeLock(Boolean(data));
 
   if (data === undefined) return null;
   if (data === null) {
@@ -190,6 +202,7 @@ export function SessionRunner() {
           upNext={upNext?.def.name ?? null}
           canUndo={canUndo}
           onUndo={() => void undoLastSet(db, sessionId)}
+          restEndsAt={data.restEndsAt}
         />
       ) : (
         <>

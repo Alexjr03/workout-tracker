@@ -61,7 +61,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 - [x] T7: Today screen and starting a session
 - [x] T8: Session runner and durable set logging
 - [x] T9: Resume after close, undo/edit, finish summary
-- [ ] T10: Rest timer
+- [x] T10: Rest timer
 - [ ] T11: Exercise swap
 - [ ] T12: Cardio session
 

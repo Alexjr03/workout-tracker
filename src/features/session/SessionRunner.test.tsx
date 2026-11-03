@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, useParams } from 'react-router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../../db/schema';
 import { startSession } from '../../db/repos/sessions';
 import { completeSet } from '../../db/repos/sets';
@@ -218,5 +218,45 @@ describe('SessionRunner: resume, undo, edit, finish', () => {
     await screen.findByText('All sets done.');
     await userEvent.click(screen.getByRole('button', { name: 'Finish session' }));
     expect(await screen.findByRole('heading', { name: `Summary ${id}` })).toBeInTheDocument();
+  });
+});
+
+describe('SessionRunner: rest timer', () => {
+  it('starts the rest for the exercise type after a set, and can be skipped', async () => {
+    const id = await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    expect(screen.queryByRole('timer')).not.toBeInTheDocument();
+
+    await userEvent.click(completeButton());
+    expect(await screen.findByRole('timer')).toHaveTextContent(/^2:(30|29)$/);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+    await vi.waitFor(() => expect(screen.queryByRole('timer')).not.toBeInTheDocument());
+    expect((await db.activeSession.get('active'))?.restEndsAt).toBeNull();
+
+    const slots = await slotsOf(id);
+    const raise = slots.find((s) => s.exerciseId === 'lateral-raise');
+    if (!raise) throw new Error('fixture');
+    await userEvent.click(screen.getByRole('button', { name: 'Overview' }));
+    await userEvent.click(screen.getByRole('button', { name: /^Lateral raise/ }));
+    await screen.findByRole('heading', { name: 'Lateral raise' });
+    await userEvent.type(weight(), '10');
+    await userEvent.click(completeButton());
+    expect(await screen.findByRole('timer')).toHaveTextContent(/^1:(15|14)$/);
+  });
+
+  it('saves a ±15 s adjustment', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    await userEvent.click(completeButton());
+    await screen.findByRole('timer');
+    const before = (await db.activeSession.get('active'))?.restEndsAt ?? '';
+    await userEvent.click(screen.getByRole('button', { name: '+15 s' }));
+    await vi.waitFor(async () => {
+      const after = (await db.activeSession.get('active'))?.restEndsAt ?? '';
+      expect(Date.parse(after) - Date.parse(before)).toBeGreaterThanOrEqual(14_000);
+    });
   });
 });

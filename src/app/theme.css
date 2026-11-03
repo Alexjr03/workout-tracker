@@ -229,6 +229,48 @@ button:disabled {
   border-color: var(--accent);
 }
 
+.rest-timer {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.rest-timer-clock {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rest-timer button {
+  padding: 0 10px;
+  font-size: 15px;
+}
+
+.rest-timer--flash {
+  border-color: var(--accent);
+  animation: rest-flash 0.5s ease-in-out 3;
+}
+
+@keyframes rest-flash {
+  50% {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rest-timer--flash {
+    animation: none;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+}
+
 .runner-undo {
   align-self: flex-start;
   color: var(--text-dim);

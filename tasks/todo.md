@@ -184,7 +184,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Files:** `src/features/session/{useActiveSession,FinishSummary,SessionOverview}.tsx`(+tests), `src/db/repos/activeSession.ts`, `src/app/UpdatePrompt.tsx`
 **Scope:** M
 
-### - [ ] T10: Rest timer
+### - [x] T10: Rest timer
 **Module:** `rest-timer`
 **Description:** `useRestTimer` stores `endsAt` in `activeSession` and computes the remaining time from the clock. `RestTimerBar` has −15 s / +15 s / Skip buttons. At zero while the app is visible, it plays a tone (Web Audio) and flashes the bar; when the app was hidden, it shows "Rest done" on return. Wake Lock is requested during an active session. The timer starts automatically after Complete set, using `restSeconds[type]`.
 

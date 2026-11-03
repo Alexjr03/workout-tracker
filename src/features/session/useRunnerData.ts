@@ -16,6 +16,7 @@ export interface RunnerData {
   exerciseIndex: number;
   /** Values typed for the current set before the app closed. */
   draft: { weight: number | null; reps: number | null };
+  restEndsAt: string | null;
   /** Only for the current exercise: history used for its defaults. */
   current: {
     lastLoggedWeight: number | null;
@@ -57,6 +58,7 @@ async function load(): Promise<RunnerData | null> {
     slots: runnerSlots,
     exerciseIndex: active.exerciseIndex,
     draft: { weight: active.draftWeight, reps: active.draftReps },
+    restEndsAt: active.restEndsAt,
     current,
   };
 }

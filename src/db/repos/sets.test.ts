@@ -3,7 +3,7 @@ import { resetDb } from '../../test/db';
 import { db } from '../schema';
 import type { SessionExerciseLog } from '../types';
 import { startSession } from './sessions';
-import { completeSet, jumpToExercise, lastTimeSets, lastWeightFor } from './sets';
+import { completeSet, jumpToExercise, lastTimeSets, lastWeightFor, setRestEndsAt } from './sets';
 
 const MON = new Date(2026, 10, 23, 18); // after ramp-up: 3 sets of bench
 let sessionId: string;
@@ -57,6 +57,38 @@ describe('completeSet', () => {
       draftWeight: null,
       draftReps: null,
     });
+  });
+});
+
+describe('rest timer', () => {
+  it('starts a compound rest (150 s) when a compound set is saved', async () => {
+    await completeSet(db, { slot: slot(0), weight: 10, reps: 10, now: MON });
+    expect((await db.activeSession.get('active'))?.restEndsAt).toBe(
+      new Date(MON.getTime() + 150_000).toISOString(),
+    );
+  });
+
+  it('starts an isolation rest (75 s) for an isolation exercise', async () => {
+    await completeSet(db, { slot: slot(4), weight: 10, reps: 15, now: MON });
+    expect((await db.activeSession.get('active'))?.restEndsAt).toBe(
+      new Date(MON.getTime() + 75_000).toISOString(),
+    );
+  });
+
+  it('follows edited rest settings', async () => {
+    await db.settings.update('settings', { restSeconds: { compound: 180, isolation: 60 } });
+    await completeSet(db, { slot: slot(0), weight: 10, reps: 10, now: MON });
+    expect((await db.activeSession.get('active'))?.restEndsAt).toBe(
+      new Date(MON.getTime() + 180_000).toISOString(),
+    );
+  });
+
+  it('can be changed or cleared', async () => {
+    const later = new Date(MON.getTime() + 30_000).toISOString();
+    await setRestEndsAt(db, later);
+    expect((await db.activeSession.get('active'))?.restEndsAt).toBe(later);
+    await setRestEndsAt(db, null);
+    expect((await db.activeSession.get('active'))?.restEndsAt).toBeNull();
   });
 });
 

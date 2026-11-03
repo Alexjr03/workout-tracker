@@ -34,6 +34,14 @@ test('runner fits on a 375×667 screen with Complete set in the thumb zone', asy
   const complete = await page.getByRole('button', { name: 'Complete set' }).boundingBox();
   expect(complete?.y).toBeGreaterThan((667 * 2) / 3);
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(667);
+
+  // With the rest timer and Undo showing, everything still fits.
+  await page.getByRole('button', { name: 'Complete set' }).click();
+  await expect(page.getByRole('timer')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Undo last set' })).toBeVisible();
+  const after = await page.getByRole('button', { name: 'Complete set' }).boundingBox();
+  expect((after?.y ?? 0) + (after?.height ?? 0)).toBeLessThanOrEqual(667);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(667);
 });
 
 test('a completed set survives a reload', async ({ page }) => {
@@ -63,6 +71,26 @@ test('values typed for a set survive a reload', async ({ page }) => {
   await page.getByRole('button', { name: 'Increase Weight' }).click();
   await page.getByRole('button', { name: 'Decrease Reps' }).click();
   await expect(page.getByRole('textbox', { name: 'Weight' })).toHaveValue('12.5');
+  await expect(page.getByRole('textbox', { name: 'Reps' })).toHaveValue('9');
+  // Drafts are written in the background; wait until the last one has landed.
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          new Promise((resolve, reject) => {
+            const open = indexedDB.open('workout-tracker');
+            open.onerror = () => reject(open.error);
+            open.onsuccess = () => {
+              const get = open.result
+                .transaction('activeSession')
+                .objectStore('activeSession')
+                .get('active');
+              get.onsuccess = () => resolve(get.result?.draftReps);
+            };
+          }),
+      ),
+    )
+    .toBe(9);
 
   await page.reload();
   await expect(page.getByText(/^Set 2 of \d$/)).toBeVisible();

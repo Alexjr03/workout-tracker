@@ -1,5 +1,6 @@
 import { Dexie } from 'dexie';
 import { nextExerciseIndex } from '../../domain/session';
+import { restEndsAt } from '../../domain/timer';
 import type { WorkoutDb } from '../schema';
 import type { SessionExerciseLog, SetLog } from '../types';
 import { exerciseHistory } from './sessions';
@@ -14,15 +15,21 @@ async function loggedCounts(db: WorkoutDb, sessionId: string) {
 }
 
 /**
- * Saves one completed set and advances the active-session pointer in the same transaction.
- * Callers await this before the UI moves on, so a closed app never loses a tapped set.
+ * Saves one completed set, advances the active-session pointer and starts the rest timer for
+ * the exercise's type, all in one transaction. Callers await this before the UI moves on, so
+ * a closed app never loses a tapped set.
  */
 export async function completeSet(
   db: WorkoutDb,
   input: { slot: SessionExerciseLog; weight: number; reps: number; now?: Date },
 ): Promise<SetLog> {
   const { slot, weight, reps, now = new Date() } = input;
-  return db.transaction('rw', db.sets, db.sessionExercises, db.activeSession, async () => {
+  const tables = [db.sets, db.sessionExercises, db.activeSession, db.settings, db.exercises];
+  return db.transaction('rw', tables, async () => {
+    const [settings, def] = await Promise.all([
+      db.settings.get('settings'),
+      db.exercises.get(slot.exerciseId),
+    ]);
     const setIndex = await db.sets.where('sessionExerciseId').equals(slot.id).count();
     const set: SetLog = {
       id: crypto.randomUUID(),
@@ -43,9 +50,16 @@ export async function completeSet(
       setIndex: counts[exerciseIndex] ?? 0,
       draftWeight: null,
       draftReps: null,
+      restEndsAt:
+        settings && def ? restEndsAt(def.type, settings.restSeconds, now.getTime()) : null,
     });
     return set;
   });
+}
+
+/** Adjusted (±15 s) or skipped (null) rest timer. */
+export async function setRestEndsAt(db: WorkoutDb, endsAt: string | null): Promise<void> {
+  await db.activeSession.update('active', { restEndsAt: endsAt });
 }
 
 /**
