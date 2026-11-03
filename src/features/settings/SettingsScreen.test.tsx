@@ -194,5 +194,12 @@ describe('SettingsScreen routine', () => {
       'href',
       '/settings/exercises',
     );
+    expect(await within(card).findByRole('link', { name: 'Upper A' })).toHaveAttribute(
+      'href',
+      '/settings/sessions/upper-a',
+    );
+    // Cardio has no exercises to edit.
+    expect(within(card).queryByRole('link', { name: 'Cardio' })).not.toBeInTheDocument();
+    expect(within(card).getAllByRole('link')).toHaveLength(6);
   });
 });

@@ -71,6 +71,7 @@ function ResetSection() {
 
 export function SettingsScreen() {
   const settings = useLiveQuery(() => db.settings.get('settings'));
+  const routine = useLiveQuery(() => db.routine.get('routine'));
   const [error, setError] = useState<string | null>(null);
   const backupHeading = useId();
   const dateId = useId();
@@ -184,6 +185,13 @@ export function SettingsScreen() {
         <Link to="/settings/exercises" className="button-like">
           Exercises
         </Link>
+        {Object.entries(routine?.sessions ?? {})
+          .filter(([, template]) => 'exercises' in template)
+          .map(([id, template]) => (
+            <Link key={id} to={`/settings/sessions/${id}`} className="button-like">
+              {template.name}
+            </Link>
+          ))}
       </section>
 
       <section aria-labelledby={backupHeading} className="card stack">

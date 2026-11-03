@@ -7,6 +7,8 @@ interface StepperProps {
   unit?: string;
   min?: number;
   onChange: (value: number | null) => void;
+  /** Report typed values when the field is left, not on every keystroke (for saved settings). */
+  commitOnBlur?: boolean;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -20,7 +22,15 @@ function parse(text: string): number | null | undefined {
 }
 
 /** Big −/+ buttons around a number field; tapping the field opens the decimal keypad. */
-export function Stepper({ label, value, step, unit, min = 0, onChange }: StepperProps) {
+export function Stepper({
+  label,
+  value,
+  step,
+  unit,
+  min = 0,
+  onChange,
+  commitOnBlur = false,
+}: StepperProps) {
   // Text being typed; null when not editing, so outside changes always show.
   const [editing, setEditing] = useState<string | null>(null);
 
@@ -47,10 +57,17 @@ export function Stepper({ label, value, step, unit, min = 0, onChange }: Stepper
           }}
           onChange={(e) => {
             setEditing(e.target.value);
+            if (commitOnBlur) return;
             const parsed = parse(e.target.value);
             if (parsed !== undefined) onChange(parsed);
           }}
-          onBlur={() => setEditing(null)}
+          onBlur={() => {
+            if (commitOnBlur && editing !== null) {
+              const parsed = parse(editing);
+              if (parsed !== undefined && parsed !== value) onChange(parsed);
+            }
+            setEditing(null);
+          }}
         />
         {/* Always rendered so the + button keeps its grid column when there is no unit. */}
         <span className="stepper-unit">{unit}</span>

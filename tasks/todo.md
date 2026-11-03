@@ -309,7 +309,7 @@ Save writes `CardioLog` and finishes the session.
 **Files:** `src/features/settings/routine/{ScheduleEditor,CatalogEditor}.tsx`(+tests), `src/db/repos/routine.ts`
 **Scope:** M
 
-### - [ ] T17: Routine editor — session templates
+### - [x] T17: Routine editor — session templates
 **Module:** `routine`
 **Description:** For each template: add from catalog, remove, reorder (up/down buttons, no drag), and edit sets/repMin/repMax.
 

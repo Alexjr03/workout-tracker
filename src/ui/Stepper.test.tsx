@@ -76,6 +76,31 @@ describe('Stepper', () => {
     expect(input()).toHaveValue('');
   });
 
+  it('with commitOnBlur, reports a typed value only when the field is left', async () => {
+    const onChange = vi.fn();
+    render(<Stepper label="Rep min" step={1} value={8} onChange={onChange} commitOnBlur />);
+    const field = screen.getByRole('textbox', { name: 'Rep min' });
+    await userEvent.clear(field);
+    await userEvent.type(field, '12');
+    expect(onChange).not.toHaveBeenCalled();
+    await userEvent.tab();
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(12);
+    await userEvent.click(screen.getByRole('button', { name: 'Increase Rep min' }));
+    expect(onChange).toHaveBeenLastCalledWith(9);
+  });
+
+  it('with commitOnBlur, ignores an unchanged or invalid value on blur', async () => {
+    const onChange = vi.fn();
+    render(<Stepper label="Rep min" step={1} value={8} onChange={onChange} commitOnBlur />);
+    const field = screen.getByRole('textbox', { name: 'Rep min' });
+    await userEvent.click(field);
+    await userEvent.tab();
+    await userEvent.clear(field);
+    await userEvent.type(field, 'x');
+    await userEvent.tab();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('shows outside value changes when not being edited', () => {
     const { rerender } = render(<Stepper label="Reps" step={1} value={8} onChange={() => {}} />);
     rerender(<Stepper label="Reps" step={1} value={9} onChange={() => {}} />);

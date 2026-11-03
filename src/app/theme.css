@@ -218,14 +218,14 @@ button:disabled {
   gap: 6px;
 }
 
-.overview button {
+.overview > li > button {
   width: 100%;
   display: flex;
   justify-content: space-between;
   text-align: left;
 }
 
-.overview button[aria-current='step'] {
+.overview > li > button[aria-current='step'] {
   border-color: var(--accent);
 }
 
@@ -361,6 +361,21 @@ button:disabled {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0 12px;
+}
+
+.template-row {
+  display: grid;
+  grid-template-columns: 1fr auto 48px 48px auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.template-row .muted {
+  font-size: 15px;
+}
+
+.template-row button {
+  padding: 0 10px;
 }
 
 .error {
