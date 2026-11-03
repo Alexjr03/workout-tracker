@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, Route, Routes, useParams } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../../db/schema';
 import { startSession } from '../../db/repos/sessions';
@@ -10,10 +10,17 @@ import { SessionRunner } from './SessionRunner';
 
 const MON = new Date(2026, 10, 23, 18); // after ramp-up
 
+function SummaryStub() {
+  return <h1>Summary {useParams().sessionId}</h1>;
+}
+
 function renderRunner() {
   return render(
     <MemoryRouter initialEntries={['/session']}>
-      <SessionRunner />
+      <Routes>
+        <Route path="/session" element={<SessionRunner />} />
+        <Route path="/summary/:sessionId" element={<SummaryStub />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -129,5 +136,87 @@ describe('SessionRunner', () => {
     renderRunner();
     expect(await screen.findByText('All sets done.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Complete set' })).not.toBeInTheDocument();
+  });
+});
+
+describe('SessionRunner: resume, undo, edit, finish', () => {
+  it('keeps typed values when the app is reopened mid-set', async () => {
+    await startSession(db, 'upper-a', MON);
+    const first = renderRunner();
+    await screen.findByText('Set 1 of 3');
+    await userEvent.click(screen.getByRole('button', { name: 'Increase Weight' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Decrease Reps' }));
+    first.unmount();
+
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    expect(weight()).toHaveValue('12.5');
+    expect(reps()).toHaveValue('9');
+  });
+
+  it('undoes the last set and pre-fills it for correction', async () => {
+    const id = await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    expect(screen.queryByRole('button', { name: 'Undo last set' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Decrease Reps' }));
+    await userEvent.click(completeButton());
+    await screen.findByText('Set 2 of 3');
+    await userEvent.click(screen.getByRole('button', { name: 'Undo last set' }));
+
+    expect(await screen.findByText('Set 1 of 3')).toBeInTheDocument();
+    expect(reps()).toHaveValue('9');
+    expect(await db.sets.where('sessionId').equals(id).count()).toBe(0);
+  });
+
+  it('edits a logged set from the overview', async () => {
+    const id = await startSession(db, 'upper-a', MON);
+    const [bench] = await slotsOf(id);
+    if (!bench) throw new Error('fixture');
+    const set = await completeSet(db, { slot: bench, weight: 10, reps: 10 });
+
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Overview' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Edit Bench press set 1: 10 × 10' }));
+    const editor = screen.getByRole('group', { name: 'Edit Bench press set 1' });
+    await userEvent.click(within(editor).getByRole('button', { name: 'Decrease Reps' }));
+    await userEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+
+    expect(
+      await screen.findByRole('button', { name: 'Edit Bench press set 1: 10 × 9' }),
+    ).toBeInTheDocument();
+    expect((await db.sets.get(set.id))?.reps).toBe(9);
+  });
+
+  it('asks before finishing with sets missing, and can keep going', async () => {
+    const id = await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Overview' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Finish session' }));
+
+    const dialog = screen.getByRole('alertdialog');
+    expect(dialog).toHaveTextContent('16 sets not done. Finish anyway?');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Keep going' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect((await db.sessions.get(id))?.status).toBe('active');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Finish session' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Finish anyway' }));
+    expect(await screen.findByRole('heading', { name: `Summary ${id}` })).toBeInTheDocument();
+    expect((await db.sessions.get(id))?.status).toBe('finished');
+  });
+
+  it('finishes without asking once every set is done', async () => {
+    const id = await startSession(db, 'upper-a', MON);
+    for (const slot of await slotsOf(id)) {
+      for (let i = 0; i < slot.prescribedSets; i++) {
+        await completeSet(db, { slot, weight: 20, reps: 10 });
+      }
+    }
+    renderRunner();
+    await screen.findByText('All sets done.');
+    await userEvent.click(screen.getByRole('button', { name: 'Finish session' }));
+    expect(await screen.findByRole('heading', { name: `Summary ${id}` })).toBeInTheDocument();
   });
 });

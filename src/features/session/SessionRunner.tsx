@@ -1,37 +1,53 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
-import { completeSet, jumpToExercise } from '../../db/repos/sets';
+import { Link, useNavigate } from 'react-router';
+import { saveDraft } from '../../db/repos/activeSession';
+import { finishSession } from '../../db/repos/sessions';
+import { completeSet, jumpToExercise, undoLastSet } from '../../db/repos/sets';
 import { db } from '../../db/schema';
 import { defaultReps, defaultWeight } from '../../domain/defaults';
 import { rirText } from '../../domain/rampUp';
 import { loadBasisLabel } from '../../domain/session';
 import { Stepper } from '../../ui/Stepper';
+import { SessionOverview } from './SessionOverview';
 import { useRunnerData, type RunnerData, type RunnerSlot } from './useRunnerData';
 
 interface SetEntryProps {
   current: RunnerSlot;
   history: NonNullable<RunnerData['current']>;
+  draft: RunnerData['draft'];
   upNext: string | null;
+  canUndo: boolean;
+  onUndo: () => void;
 }
 
-/** One set's inputs. Re-keyed per set, so its state starts from that set's defaults. */
-function SetEntry({ current, history, upNext }: SetEntryProps) {
+/** One set's inputs. Re-keyed per set, so its state starts from that set's draft or defaults. */
+function SetEntry({ current, history, draft, upNext, canUndo, onUndo }: SetEntryProps) {
   const { slot, def, sets } = current;
   const setIndex = sets.length;
-  const [weight, setWeight] = useState<number | null>(() =>
-    defaultWeight({
-      previousSetWeight: sets.at(-1)?.weight ?? null,
-      suggestion: slot.suggestedWeight,
-      lastLoggedWeight: history.lastLoggedWeight,
-      startingLoad: history.startingLoad,
-    }),
+  const [weight, setWeight] = useState<number | null>(
+    () =>
+      draft.weight ??
+      defaultWeight({
+        previousSetWeight: sets.at(-1)?.weight ?? null,
+        suggestion: slot.suggestedWeight,
+        lastLoggedWeight: history.lastLoggedWeight,
+        startingLoad: history.startingLoad,
+      }),
   );
-  const [reps, setReps] = useState<number | null>(() =>
-    defaultReps({ setIndex, lastTimeSets: history.lastTimeSets, repMax: slot.repMax }),
+  const [reps, setReps] = useState<number | null>(
+    () =>
+      draft.reps ??
+      defaultReps({ setIndex, lastTimeSets: history.lastTimeSets, repMax: slot.repMax }),
   );
   const [saving, setSaving] = useState(false);
   const unit = loadBasisLabel(def.loadBasis);
   const canComplete = weight !== null && reps !== null && reps >= 1 && !saving;
+
+  function change(next: { weight: number | null; reps: number | null }) {
+    setWeight(next.weight);
+    setReps(next.reps);
+    void saveDraft(db, next);
+  }
 
   async function complete() {
     if (weight === null || reps === null) return;
@@ -63,9 +79,20 @@ function SetEntry({ current, history, upNext }: SetEntryProps) {
         unit={unit}
         step={def.increment}
         value={weight}
-        onChange={setWeight}
+        onChange={(w) => change({ weight: w, reps })}
       />
-      <Stepper label="Reps" step={1} min={1} value={reps} onChange={setReps} />
+      <Stepper
+        label="Reps"
+        step={1}
+        min={1}
+        value={reps}
+        onChange={(r) => change({ weight, reps: r })}
+      />
+      {canUndo && (
+        <button type="button" className="runner-undo" onClick={onUndo}>
+          Undo last set
+        </button>
+      )}
 
       <div className="runner-action">
         {upNext && <p className="muted">Up next: {upNext}</p>}
@@ -82,30 +109,11 @@ function SetEntry({ current, history, upNext }: SetEntryProps) {
   );
 }
 
-function Overview({ data, onPick }: { data: RunnerData; onPick: (i: number) => void }) {
-  return (
-    <ul className="overview" aria-label="Exercises">
-      {data.slots.map(({ slot, def, sets }, i) => (
-        <li key={slot.id}>
-          <button
-            type="button"
-            aria-current={i === data.exerciseIndex ? 'step' : undefined}
-            onClick={() => onPick(i)}
-          >
-            {def.name}
-            <span>
-              {sets.length}/{slot.prescribedSets}
-            </span>
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function SessionRunner() {
   const data = useRunnerData();
+  const navigate = useNavigate();
   const [showOverview, setShowOverview] = useState(false);
+  const [confirmFinish, setConfirmFinish] = useState(false);
 
   if (data === undefined) return null;
   if (data === null) {
@@ -117,14 +125,30 @@ export function SessionRunner() {
     );
   }
 
+  const { sessionId } = data;
   const current = data.slots[data.exerciseIndex];
   const upNext = data.slots.find(
     (s, i) => i > data.exerciseIndex && s.sets.length < s.slot.prescribedSets,
   );
+  const setsMissing = data.slots.reduce(
+    (n, s) => n + Math.max(0, s.slot.prescribedSets - s.sets.length),
+    0,
+  );
+  const canUndo = data.slots.some((s) => s.sets.length > 0);
 
   async function pick(i: number) {
     setShowOverview(false);
-    if (data) await jumpToExercise(db, data.sessionId, i);
+    await jumpToExercise(db, sessionId, i);
+  }
+
+  async function finish() {
+    await finishSession(db, sessionId);
+    navigate(`/summary/${sessionId}`);
+  }
+
+  function requestFinish() {
+    if (setsMissing > 0) setConfirmFinish(true);
+    else void finish();
   }
 
   return (
@@ -141,17 +165,41 @@ export function SessionRunner() {
         </button>
       </header>
 
-      {showOverview && <Overview data={data} onPick={(i) => void pick(i)} />}
+      {confirmFinish && (
+        <div role="alertdialog" aria-label="Finish session?" className="card stack">
+          <p>{setsMissing} sets not done. Finish anyway?</p>
+          <button type="button" className="danger" onClick={() => void finish()}>
+            Finish anyway
+          </button>
+          <button type="button" onClick={() => setConfirmFinish(false)}>
+            Keep going
+          </button>
+        </div>
+      )}
+
+      {showOverview && (
+        <SessionOverview data={data} onPick={(i) => void pick(i)} onFinish={requestFinish} />
+      )}
 
       {current && data.current ? (
         <SetEntry
           key={`${current.slot.id}:${current.sets.length}`}
           current={current}
           history={data.current}
+          draft={data.draft}
           upNext={upNext?.def.name ?? null}
+          canUndo={canUndo}
+          onUndo={() => void undoLastSet(db, sessionId)}
         />
       ) : (
-        <p className="runner-target">All sets done.</p>
+        <>
+          <p className="runner-target">All sets done.</p>
+          <div className="runner-action">
+            <button type="button" className="primary" onClick={requestFinish}>
+              Finish session
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

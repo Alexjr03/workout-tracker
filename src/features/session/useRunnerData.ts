@@ -14,6 +14,8 @@ export interface RunnerData {
   sessionId: string;
   slots: RunnerSlot[];
   exerciseIndex: number;
+  /** Values typed for the current set before the app closed. */
+  draft: { weight: number | null; reps: number | null };
   /** Only for the current exercise: history used for its defaults. */
   current: {
     lastLoggedWeight: number | null;
@@ -54,6 +56,7 @@ async function load(): Promise<RunnerData | null> {
     sessionId: session.id,
     slots: runnerSlots,
     exerciseIndex: active.exerciseIndex,
+    draft: { weight: active.draftWeight, reps: active.draftReps },
     current,
   };
 }

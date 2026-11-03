@@ -51,3 +51,21 @@ test('a completed set survives a reload', async ({ page }) => {
   await expect(page.getByText(/^Set 2 of \d$/)).toBeVisible();
   await expect(page.getByRole('textbox', { name: 'Weight' })).toHaveValue('10');
 });
+
+test('values typed for a set survive a reload', async ({ page }) => {
+  await page.goto('/');
+  await page
+    .getByRole('button', { name: /^(Start )?Upper A$/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Complete set' }).click();
+  await expect(page.getByText(/^Set 2 of \d$/)).toBeVisible();
+  await page.getByRole('button', { name: 'Increase Weight' }).click();
+  await page.getByRole('button', { name: 'Decrease Reps' }).click();
+  await expect(page.getByRole('textbox', { name: 'Weight' })).toHaveValue('12.5');
+
+  await page.reload();
+  await expect(page.getByText(/^Set 2 of \d$/)).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Weight' })).toHaveValue('12.5');
+  await expect(page.getByRole('textbox', { name: 'Reps' })).toHaveValue('9');
+});

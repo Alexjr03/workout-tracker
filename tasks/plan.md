@@ -60,7 +60,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 ### Phase 3: Workout logging
 - [x] T7: Today screen and starting a session
 - [x] T8: Session runner and durable set logging
-- [ ] T9: Resume after close, undo/edit, finish summary
+- [x] T9: Resume after close, undo/edit, finish summary
 - [ ] T10: Rest timer
 - [ ] T11: Exercise swap
 - [ ] T12: Cardio session

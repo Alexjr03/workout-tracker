@@ -114,6 +114,13 @@ export async function startSession(db: WorkoutDb, templateId: string, now = new 
   );
 }
 
+export async function finishSession(db: WorkoutDb, sessionId: string, now = new Date()) {
+  await db.transaction('rw', db.sessions, db.activeSession, async () => {
+    await db.sessions.update(sessionId, { status: 'finished', finishedAt: now.toISOString() });
+    await db.activeSession.delete('active');
+  });
+}
+
 export async function discardSession(db: WorkoutDb, sessionId: string) {
   await db.transaction('rw', db.sessions, db.activeSession, async () => {
     await db.sessions.update(sessionId, { status: 'discarded' });

@@ -166,7 +166,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Files:** `src/features/session/SessionRunner.tsx`(+test), `src/ui/Stepper.tsx`(+test), `src/db/repos/sets.ts`(+test), `e2e/session.spec.ts`
 **Scope:** M
 
-### - [ ] T9: Resume after close, undo/edit, finish summary
+### - [x] T9: Resume after close, undo/edit, finish summary
 **Module:** `workout-logging`
 **Description:**
 - Persist active-session UI state (current slot, set index, entered values) to `activeSession` whenever it changes, and restore it on boot.

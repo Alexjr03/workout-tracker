@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { FinishSummary } from '../features/session/FinishSummary';
 import { SessionRunner } from '../features/session/SessionRunner';
 import { TodayScreen } from '../features/today/TodayScreen';
 
@@ -24,4 +25,5 @@ export const TABS: Tab[] = [
 /** Screens reached from a tab rather than the nav bar. */
 export const SCREENS: { path: string; element: ReactNode }[] = [
   { path: '/session', element: <SessionRunner /> },
+  { path: '/summary/:sessionId', element: <FinishSummary /> },
 ];

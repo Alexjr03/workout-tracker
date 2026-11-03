@@ -48,6 +48,35 @@ export async function completeSet(
   });
 }
 
+/**
+ * Deletes the session's most recent set and points the runner back at it, with its values
+ * pre-filled so it can be corrected. Returns the removed set, or null if none was logged.
+ */
+export async function undoLastSet(db: WorkoutDb, sessionId: string): Promise<SetLog | null> {
+  return db.transaction('rw', db.sets, db.sessionExercises, db.activeSession, async () => {
+    const sets = await db.sets.where('sessionId').equals(sessionId).sortBy('completedAt');
+    const last = sets.at(-1);
+    if (!last) return null;
+    const slot = await db.sessionExercises.get(last.sessionExerciseId);
+    await db.sets.delete(last.id);
+    await db.activeSession.update('active', {
+      exerciseIndex: slot?.order ?? 0,
+      setIndex: last.setIndex,
+      draftWeight: last.weight,
+      draftReps: last.reps,
+    });
+    return last;
+  });
+}
+
+export async function updateSet(
+  db: WorkoutDb,
+  setId: string,
+  values: { weight: number; reps: number },
+): Promise<void> {
+  await db.sets.update(setId, values);
+}
+
 export async function jumpToExercise(db: WorkoutDb, sessionId: string, exerciseIndex: number) {
   await db.transaction('rw', db.sets, db.sessionExercises, db.activeSession, async () => {
     const { counts } = await loggedCounts(db, sessionId);

@@ -1,5 +1,7 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import { HashRouter } from 'react-router';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { db } from '../db/schema';
 import { AppRoutes } from './App';
 import { UpdatePrompt } from './UpdatePrompt';
 
@@ -9,6 +11,8 @@ export function Root() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW();
+  // Never offer a reload mid-workout (and stay quiet until we know).
+  const activeCount = useLiveQuery(() => db.activeSession.count());
 
   return (
     <HashRouter>
@@ -16,7 +20,7 @@ export function Root() {
         overlay={
           <UpdatePrompt
             needRefresh={needRefresh}
-            suppressed={false}
+            suppressed={activeCount !== 0}
             onUpdate={() => void updateServiceWorker()}
             onDismiss={() => setNeedRefresh(false)}
           />
