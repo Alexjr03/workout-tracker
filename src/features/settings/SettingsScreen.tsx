@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useId, useState } from 'react';
+import { Link } from 'react-router';
 import {
   resetToSeed,
   SettingsError,
@@ -173,6 +174,16 @@ export function SettingsScreen() {
           value={settings.goalWeightKg}
           onChange={saveNumber((goalWeightKg) => ({ goalWeightKg }))}
         />
+      </section>
+
+      <section className="card stack" aria-label="Routine">
+        <h2>Routine</h2>
+        <Link to="/settings/schedule" className="button-like">
+          Weekly schedule
+        </Link>
+        <Link to="/settings/exercises" className="button-like">
+          Exercises
+        </Link>
       </section>
 
       <section aria-labelledby={backupHeading} className="card stack">

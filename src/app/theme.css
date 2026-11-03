@@ -344,6 +344,25 @@ button:disabled {
   text-align: left;
 }
 
+.back-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+}
+
+.field select {
+  min-height: var(--tap-primary);
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 12px;
+}
+
 .error {
   margin: 0;
   padding: 10px 12px;

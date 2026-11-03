@@ -293,7 +293,7 @@ Save writes `CardioLog` and finishes the session.
 **Files:** `src/features/settings/SettingsScreen.tsx`(+test), `src/db/repos/settings.ts`(+test)
 **Scope:** M
 
-### - [ ] T16: Routine editor — schedule and exercise catalog
+### - [x] T16: Routine editor — schedule and exercise catalog
 **Module:** `routine`
 **Description:**
 - Schedule editor: a session picker or "rest" for each weekday.

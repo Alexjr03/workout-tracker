@@ -75,7 +75,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 
 ### Phase 5: Settings and routine editing
 - [x] T15: Settings screen
-- [ ] T16: Routine editor: schedule and exercise catalog
+- [x] T16: Routine editor: schedule and exercise catalog
 - [ ] T17: Routine editor: session templates
 
 ### Phase 6: History

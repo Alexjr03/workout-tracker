@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../../db/schema';
 import { resetDb } from '../../test/db';
@@ -16,14 +17,14 @@ afterEach(() => {
 
 describe('SettingsScreen backup', () => {
   it('shows that no backup was made yet', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     expect(await screen.findByText('Last backup: never')).toBeInTheDocument();
   });
 
   it('exports through the Share Sheet and updates the last backup', async () => {
     const share = vi.fn(() => Promise.resolve());
     vi.stubGlobal('navigator', { canShare: () => true, share });
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.click(await screen.findByRole('button', { name: 'Export backup' }));
 
     expect(await screen.findByText('Backup exported.')).toBeInTheDocument();
@@ -38,7 +39,7 @@ describe('SettingsScreen backup', () => {
         throw new Error('Sharing unavailable');
       },
     });
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.click(await screen.findByRole('button', { name: 'Export backup' }));
     expect(await screen.findByText('Export failed: Sharing unavailable')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Export backup' })).toBeEnabled();
@@ -47,7 +48,7 @@ describe('SettingsScreen backup', () => {
   it('says so when the export is cancelled', async () => {
     const abort = new DOMException('cancelled', 'AbortError');
     vi.stubGlobal('navigator', { canShare: () => true, share: () => Promise.reject(abort) });
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.click(await screen.findByRole('button', { name: 'Export backup' }));
     expect(await screen.findByText('Export cancelled.')).toBeInTheDocument();
     expect(screen.getByText('Last backup: never')).toBeInTheDocument();
@@ -65,7 +66,7 @@ describe('SettingsScreen import', () => {
 
   it('previews the backup, asks, then replaces everything', async () => {
     const file = await backupFile();
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.upload(await screen.findByLabelText('Import backup'), file);
 
     const dialog = await screen.findByRole('alertdialog');
@@ -79,7 +80,7 @@ describe('SettingsScreen import', () => {
 
   it('can be cancelled without changing anything', async () => {
     const file = await backupFile();
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.upload(await screen.findByLabelText('Import backup'), file);
     await userEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
@@ -87,7 +88,7 @@ describe('SettingsScreen import', () => {
   });
 
   it('explains a bad file and changes nothing', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     const bad = new File(['{"app":"other"}'], 'x.json', { type: 'application/json' });
     await userEvent.upload(await screen.findByLabelText('Import backup'), bad);
     expect(await screen.findByText('This file is not a Workout backup.')).toBeInTheDocument();
@@ -100,7 +101,7 @@ describe('SettingsScreen fields', () => {
   const stored = async () => (await db.settings.get('settings')) ?? null;
 
   it('shows the current values', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     expect(await screen.findByLabelText('Program start date')).toHaveValue('2026-11-03');
     expect(field('Ramp-up weeks')).toHaveValue('2');
     expect(field('Compound rest')).toHaveValue('150');
@@ -112,7 +113,7 @@ describe('SettingsScreen fields', () => {
   });
 
   it('saves stepper changes straight away', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.click(await screen.findByRole('button', { name: 'Increase Compound rest' }));
     await userEvent.click(screen.getByRole('button', { name: 'Decrease Calorie max' }));
     await vi.waitFor(async () =>
@@ -124,7 +125,7 @@ describe('SettingsScreen fields', () => {
   });
 
   it('sets and clears the protein target', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.type(await screen.findByRole('textbox', { name: 'Protein target' }), '140');
     await vi.waitFor(async () => expect((await stored())?.proteinTargetG).toBe(140));
     await userEvent.clear(field('Protein target'));
@@ -132,7 +133,7 @@ describe('SettingsScreen fields', () => {
   });
 
   it('shows an error for an invalid value and keeps the saved one', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     const calories = await screen.findByRole('textbox', { name: 'Calorie max' });
     await userEvent.clear(calories);
     await userEvent.type(calories, '0');
@@ -143,7 +144,7 @@ describe('SettingsScreen fields', () => {
   });
 
   it('changes the program start date', async () => {
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     const date = await screen.findByLabelText('Program start date');
     // The iOS date picker sets the whole value at once.
     fireEvent.change(date, { target: { value: '2026-11-20' } });
@@ -152,7 +153,7 @@ describe('SettingsScreen fields', () => {
 
   it('resets to the seed only after typing RESET', async () => {
     await db.settings.update('settings', { calorieMax: 2200 });
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.click(await screen.findByRole('button', { name: 'Reset routine to defaults' }));
     const dialog = screen.getByRole('alertdialog');
     const confirm = within(dialog).getByRole('button', { name: 'Reset' });
@@ -171,12 +172,27 @@ describe('SettingsScreen fields', () => {
 
   it('can cancel a reset', async () => {
     await db.settings.update('settings', { calorieMax: 2200 });
-    render(<SettingsScreen />);
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.click(await screen.findByRole('button', { name: 'Reset routine to defaults' }));
     await userEvent.click(
       within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }),
     );
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect((await stored())?.calorieMax).toBe(2200);
+  });
+});
+
+describe('SettingsScreen routine', () => {
+  it('links to the schedule, exercise and session editors', async () => {
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
+    const card = await screen.findByRole('region', { name: 'Routine' });
+    expect(within(card).getByRole('link', { name: 'Weekly schedule' })).toHaveAttribute(
+      'href',
+      '/settings/schedule',
+    );
+    expect(within(card).getByRole('link', { name: 'Exercises' })).toHaveAttribute(
+      'href',
+      '/settings/exercises',
+    );
   });
 });

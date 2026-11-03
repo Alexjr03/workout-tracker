@@ -5,7 +5,7 @@ export function BottomNav() {
   return (
     <nav className="bottom-nav" aria-label="Main">
       {TABS.map((tab) => (
-        <NavLink key={tab.path} to={tab.path} end>
+        <NavLink key={tab.path} to={tab.path} end={tab.path === '/'}>
           {tab.label}
         </NavLink>
       ))}

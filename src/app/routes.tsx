@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { FinishSummary } from '../features/session/FinishSummary';
 import { SessionRunner } from '../features/session/SessionRunner';
+import { CatalogEditor } from '../features/settings/routine/CatalogEditor';
+import { ScheduleEditor } from '../features/settings/routine/ScheduleEditor';
 import { SettingsScreen } from '../features/settings/SettingsScreen';
 import { TodayScreen } from '../features/today/TodayScreen';
 
@@ -27,4 +29,6 @@ export const TABS: Tab[] = [
 export const SCREENS: { path: string; element: ReactNode }[] = [
   { path: '/session', element: <SessionRunner /> },
   { path: '/summary/:sessionId', element: <FinishSummary /> },
+  { path: '/settings/schedule', element: <ScheduleEditor /> },
+  { path: '/settings/exercises', element: <CatalogEditor /> },
 ];
