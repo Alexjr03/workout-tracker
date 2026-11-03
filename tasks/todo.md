@@ -27,7 +27,7 @@ Spec: [SPEC.md](../SPEC.md) · Plan: [plan.md](plan.md)
 **Files:** `package.json`, `vite.config.ts`, `tsconfig*.json`, `eslint.config.js`, `.prettierrc`, `playwright.config.ts`, `src/main.tsx`, `src/app/App.tsx`, `src/app/App.test.tsx`, `e2e/smoke.spec.ts`
 **Scope:** M
 
-### - [ ] T2: PWA shell, offline caching, navigation, theme
+### - [x] T2: PWA shell, offline caching, navigation, theme
 **Module:** `app-shell`
 **Description:** Configure `vite-plugin-pwa`:
 - Manifest: standalone, name "Workout", icons including the 180px apple-touch-icon.

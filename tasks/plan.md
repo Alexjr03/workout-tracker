@@ -45,7 +45,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 
 ### Phase 1: Foundation
 - [x] T1: Scaffold project and tooling
-- [ ] T2: PWA shell, offline caching, navigation, theme
+- [x] T2: PWA shell, offline caching, navigation, theme
 - [ ] T3: Deploy to GitHub Pages and install on iPhone
 - [ ] T4: Date helpers, Dexie schema, seed-once loading
 
