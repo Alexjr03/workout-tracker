@@ -104,7 +104,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 **Files:** `src/domain/schedule.ts`(+test), `src/domain/rampUp.ts`(+test)
 **Scope:** S
 
-### - [ ] T6: `defaultWeight`, `defaultReps`, `progressionSuggestion`
+### - [x] T6: `defaultWeight`, `defaultReps`, `progressionSuggestion`
 **Module:** `routine`
 **Description:** Pure functions that take plain arrays of past logs (no Dexie). They implement the priority chains and progression rule from SPEC › `routine`.
 

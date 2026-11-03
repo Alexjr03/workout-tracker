@@ -53,7 +53,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 
 ### Phase 2: Domain rules (TDD)
 - [x] T5: `sessionForDate` + `prescriptionFor` (ramp-up)
-- [ ] T6: `defaultWeight`, `defaultReps`, `progressionSuggestion`
+- [x] T6: `defaultWeight`, `defaultReps`, `progressionSuggestion`
 
 **Checkpoint B:** `src/domain/` at 100% branch coverage
 
