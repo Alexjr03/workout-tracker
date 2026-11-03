@@ -52,7 +52,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 **Checkpoint A:** `npm run check` green · installs on iPhone · cold start works in airplane mode · seed visible in IndexedDB
 
 ### Phase 2: Domain rules (TDD)
-- [ ] T5: `sessionForDate` + `prescriptionFor` (ramp-up)
+- [x] T5: `sessionForDate` + `prescriptionFor` (ramp-up)
 - [ ] T6: `defaultWeight`, `defaultReps`, `progressionSuggestion`
 
 **Checkpoint B:** `src/domain/` at 100% branch coverage

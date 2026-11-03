@@ -90,7 +90,7 @@ Deployed 2026-11-03 (live, verified loading + SW + seed). Owner confirmed iPhone
 
 ## Phase 2: Domain rules (TDD — write the tests first)
 
-### - [ ] T5: `sessionForDate` and `prescriptionFor`
+### - [x] T5: `sessionForDate` and `prescriptionFor`
 **Module:** `routine`
 **Description:** Pure functions as specified in SPEC › `routine` (ramp-up based on `programStartDate` and `rampUpWeeks`).
 
