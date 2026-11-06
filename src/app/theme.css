@@ -684,3 +684,34 @@ button[aria-pressed='true'] {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+
+.day-nav {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  text-align: center;
+  font-weight: 600;
+}
+
+.progress {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progress > div {
+  height: 100%;
+  background: var(--accent);
+}
+
+.progress.over > div {
+  background: var(--danger);
+}
+
+.food-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

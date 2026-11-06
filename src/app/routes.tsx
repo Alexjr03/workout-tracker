@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { BodyScreen } from '../features/body/BodyScreen';
+import { FoodScreen } from '../features/food/FoodScreen';
 import { ExerciseProgress } from '../features/history/ExerciseProgress';
 import { HistoryList } from '../features/history/HistoryList';
 import { SessionDetailScreen } from '../features/history/SessionDetailScreen';
@@ -17,16 +18,11 @@ export interface Tab {
   element: ReactNode;
 }
 
-// Placeholder screens; each feature task replaces its element.
-function Placeholder({ title }: { title: string }) {
-  return <h1>{title}</h1>;
-}
-
 export const TABS: Tab[] = [
   { path: '/', label: 'Today', element: <TodayScreen /> },
   { path: '/history', label: 'History', element: <HistoryList /> },
   { path: '/body', label: 'Body', element: <BodyScreen /> },
-  { path: '/food', label: 'Food', element: <Placeholder title="Food" /> },
+  { path: '/food', label: 'Food', element: <FoodScreen /> },
   { path: '/settings', label: 'Settings', element: <SettingsScreen /> },
 ];
 

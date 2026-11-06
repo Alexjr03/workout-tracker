@@ -36,7 +36,7 @@ describe('AppRoutes', () => {
   it('switches screens when a tab is tapped', async () => {
     renderAt('/');
     await userEvent.click(screen.getByRole('link', { name: 'Food' }));
-    expect(screen.getByRole('heading', { name: 'Food' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Food' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Food' })).toHaveAttribute('aria-current', 'page');
   });
 

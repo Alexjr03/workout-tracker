@@ -398,7 +398,7 @@ Save writes `CardioLog` and finishes the session.
 **Files:** `src/domain/averages.ts`(+test), `src/features/body/BodyScreen.tsx`(+test), `src/db/repos/bodyWeight.ts`
 **Scope:** M
 
-### - [ ] T22: Nutrition log and protein target
+### - [x] T22: Nutrition log and protein target
 **Module:** `nutrition`
 **Description:**
 - **Day view:** kcal eaten / `calorieMax`, remaining kcal, and a progress bar that turns warning-colored above the max.

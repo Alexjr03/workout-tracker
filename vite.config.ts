@@ -33,6 +33,8 @@ export default defineConfig({
   ],
   test: {
     environment: 'jsdom',
+    // Default 5 s is too tight when ~50 DB-backed files run in parallel with coverage.
+    testTimeout: 15_000,
     setupFiles: ['src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
