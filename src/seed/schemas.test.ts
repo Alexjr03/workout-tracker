@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import exerciseDefaultsJson from './exerciseDefaults.json';
 import routineJson from './routine.json';
+import videosJson from './videos.json';
 import { exerciseDefaultsSchema, routineSeedSchema } from './schemas';
 
 function appendixA(): unknown {
@@ -37,6 +38,13 @@ describe('exerciseDefaults.json', () => {
       ),
     );
     expect(Object.keys(exerciseDefaultsJson).sort()).toEqual([...ids].sort());
+  });
+});
+
+describe('videos.json', () => {
+  it('has a valid YouTube video id for every seed exercise', () => {
+    expect(Object.keys(videosJson).sort()).toEqual(Object.keys(exerciseDefaultsJson).sort());
+    for (const id of Object.values(videosJson)) expect(id).toMatch(/^[\w-]{11}$/);
   });
 });
 

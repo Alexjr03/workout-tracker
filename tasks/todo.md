@@ -579,4 +579,5 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 
 #### T30 notes (2026-11-06)
 - 11 of 21 seed exercises have a built-in video (src/seed/videos.json), each the top YouTube result for "how to do <exercise> proper form" and confirmed embeddable via YouTube oEmbed. Finding the other 10 stopped when YouTube began redirecting automated searches (not worked around). They show "Search YouTube for …" until a link is pasted in Settings → Exercises.
+- Update: the other 10 were found with a normal web search (YouTube results) and verified embeddable via oEmbed; all 21 now have a built-in video.
 - Known flaky test: "swaps to a new exercise for this session only" failed once under a heavily loaded full run, passed in 3 reruns.

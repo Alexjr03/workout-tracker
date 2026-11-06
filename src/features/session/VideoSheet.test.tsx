@@ -14,7 +14,7 @@ const bench: ExerciseDef = {
   muscle: 'chest',
   unit: 'lb',
 };
-const calf: ExerciseDef = { ...bench, id: 'calf-raise', name: 'Calf raise' };
+const hack: ExerciseDef = { ...bench, id: 'hack-squat', name: 'Hack squat', isCustom: true };
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -24,7 +24,7 @@ describe('videoIdFor', () => {
   it('prefers a saved link, then the built-in video, else none', () => {
     expect(videoIdFor({ ...bench, videoId: 'aaaaaaaaaaa' })).toBe('aaaaaaaaaaa');
     expect(videoIdFor(bench)).toBe('hWbUlkb5Ms4');
-    expect(videoIdFor(calf)).toBeNull();
+    expect(videoIdFor(hack)).toBeNull();
   });
 });
 
@@ -42,11 +42,11 @@ describe('VideoSheet', () => {
   });
 
   it('offers a YouTube search when there is no video', () => {
-    render(<VideoSheet exercise={calf} onClose={() => {}} />);
-    expect(screen.queryByTitle('Calf raise how-to video')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Search YouTube for Calf raise' })).toHaveAttribute(
+    render(<VideoSheet exercise={hack} onClose={() => {}} />);
+    expect(screen.queryByTitle('Hack squat how-to video')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Search YouTube for Hack squat' })).toHaveAttribute(
       'href',
-      'https://www.youtube.com/results?search_query=how%20to%20do%20Calf%20raise%20proper%20form',
+      'https://www.youtube.com/results?search_query=how%20to%20do%20Hack%20squat%20proper%20form',
     );
   });
 

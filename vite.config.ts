@@ -35,6 +35,8 @@ export default defineConfig({
     environment: 'jsdom',
     // Default 5 s is too tight when ~50 DB-backed files run in parallel with coverage.
     testTimeout: 15_000,
+    // All cores starved the fake IndexedDB tests and made random ones time out; half is stable.
+    maxWorkers: '50%',
     setupFiles: ['src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
