@@ -38,10 +38,15 @@ export function collectDiff() {
   const added = [];
   const removed = [];
   let file = '';
+  let oldFile = '';
   let line = 0;
   for (const raw of (tracked + '\n' + untracked).split('\n')) {
-    if (raw.startsWith('+++ ')) {
-      file = raw.slice(4).replace(/^b\//, '');
+    if (raw.startsWith('--- ')) {
+      oldFile = raw.slice(4).replace(/^a\//, '');
+    } else if (raw.startsWith('+++ ')) {
+      // A deleted file's new side is /dev/null: attribute its removed lines to the old path.
+      const next = raw.slice(4).replace(/^b\//, '');
+      file = next === '/dev/null' ? oldFile : next;
     } else if (raw.startsWith('@@')) {
       line = Number(/\+(\d+)/.exec(raw)?.[1] ?? 0);
     } else if (raw.startsWith('+')) {
