@@ -6,11 +6,14 @@ import { pushBackToday } from '../../db/repos/settings';
 import { discardSession, getActiveSession, startSession } from '../../db/repos/sessions';
 import { db } from '../../db/schema';
 import type { SessionTemplate } from '../../db/types';
-import { daysBetween, formatDayLabel, toLocalDate } from '../../domain/dates';
+import { addDays, daysBetween, formatDayLabel, toLocalDate } from '../../domain/dates';
 import { prescriptionFor } from '../../domain/rampUp';
 import { canPushBack, pushBacksLeft, sessionForDate, weekStart } from '../../domain/schedule';
 import { historySummary } from '../history/HistoryList';
 import { BackupNudge } from './BackupNudge';
+
+const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 function summary(template: SessionTemplate): string {
   if ('cardio' in template) {
@@ -30,16 +33,28 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
   const othersHeading = useId();
 
   const data = useLiveQuery(async () => {
-    const [settings, routine, active, recent] = await Promise.all([
+    const monday = weekStart(today);
+    const [settings, routine, active, recent, week, food, weight] = await Promise.all([
       db.settings.get('settings'),
       db.routine.get('routine'),
       getActiveSession(db),
       listHistory(db, { limit: 5 }),
+      db.sessions.where('date').between(monday, addDays(monday, 6), true, true).toArray(),
+      db.food.where('date').equals(today).toArray(),
+      db.bodyWeight.orderBy('date').last(),
     ]);
-    return { settings, routine, active, doneToday: recent.find((s) => s.date === today) };
+    return {
+      settings,
+      routine,
+      active,
+      doneToday: recent.find((s) => s.date === today),
+      trained: new Set(week.filter((s) => s.status === 'finished').map((s) => s.date)),
+      eaten: food.reduce((n, e) => n + e.kcal, 0),
+      weight,
+    };
   }, [today]);
   if (!data?.settings || !data.routine) return null;
-  const { settings, routine, active, doneToday } = data;
+  const { settings, routine, active, doneToday, trained, eaten, weight } = data;
 
   const pushBacks = (settings.pushBacks ?? []).filter((d) => weekStart(d) === weekStart(today));
   const scheduledId = sessionForDate(today, routine, pushBacks);
@@ -69,29 +84,113 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
     navigate('/session');
   }
 
+  const monday = weekStart(today);
+  const week = DAY_LETTERS.map((letter, i) => {
+    const date = addDays(monday, i);
+    const state = trained.has(date)
+      ? 'done'
+      : sessionForDate(date, routine, pushBacks) === 'rest'
+        ? 'rest'
+        : 'planned';
+    return { date, letter, name: DAY_NAMES[i], state };
+  });
+  const kcalLeft = settings.calorieMax - eaten;
+
   return (
     <div className="stack">
-      <header>
-        <h1>Today</h1>
-        <p className="muted">{formatDayLabel(today)}</p>
-        {rampUp && (
-          <p className="banner">
-            Ramp-up week {rampUpWeek} of {settings.rampUpWeeks}
-          </p>
-        )}
-        {pushBacks.length > 0 && (
-          <p className="muted">
-            Week pushed back {pushBacks.length} {pushBacks.length === 1 ? 'day' : 'days'} · resets
-            Monday
-          </p>
-        )}
-      </header>
+      <div className="cover stack">
+        <header>
+          <h1 className="visually-hidden">Today</h1>
+          <p className="cover-meta">{formatDayLabel(today)}</p>
+          {rampUp && (
+            <p className="banner">
+              Ramp-up week {rampUpWeek} of {settings.rampUpWeeks}
+            </p>
+          )}
+          {pushBacks.length > 0 && (
+            <p className="cover-meta">
+              Week pushed back {pushBacks.length} {pushBacks.length === 1 ? 'day' : 'days'} · resets
+              Monday
+            </p>
+          )}
+        </header>
 
-      {active && (
-        <button type="button" className="primary" onClick={() => navigate('/session')}>
-          Resume {active.templateName}
-        </button>
-      )}
+        {doneToday ? (
+          <section aria-label="Workout complete" className="stack">
+            <p className="cover-meta">Workout complete ✓</p>
+            <h2 className="cover-big">{doneToday.name}</h2>
+            <p className="cover-meta">{historySummary(doneToday)}</p>
+            <p className="cover-meta">Nice work. Rest up and refuel.</p>
+            <Link to={`/history/session/${doneToday.id}`} className="button-like">
+              See details
+            </Link>
+          </section>
+        ) : scheduled ? (
+          <section aria-labelledby={scheduledHeading} className="stack">
+            <h2 id={scheduledHeading} className="cover-big">
+              {scheduled.name}
+            </h2>
+            <p className="cover-meta">{summary(scheduled)}</p>
+            {confirmPush ? (
+              <div role="alertdialog" aria-label="Push back a day?" className="stack">
+                <p>
+                  {scheduled.name} moves to tomorrow and the rest of the week shifts one day.{' '}
+                  {restDaysLeft} rest {restDaysLeft === 1 ? 'day' : 'days'} left this week; this
+                  uses 1. Resets Monday.
+                </p>
+                <div className="cover-actions">
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={() => void pushBackToday(db, now).then(() => setConfirmPush(false))}
+                  >
+                    Push back a day
+                  </button>
+                  <button type="button" onClick={() => setConfirmPush(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="cover-actions">
+                {active && (
+                  <button type="button" className="primary" onClick={() => navigate('/session')}>
+                    Resume <span className="visually-hidden">{active.templateName}</span>{' '}
+                    <span aria-hidden="true">›</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={active ? undefined : 'primary'}
+                  onClick={() => void start(scheduledId, scheduled.name)}
+                >
+                  Start <span className="visually-hidden">{scheduled.name}</span>{' '}
+                  <span aria-hidden="true">›</span>
+                </button>
+                {canPush && (
+                  <button type="button" onClick={() => setConfirmPush(true)}>
+                    Can&apos;t train today
+                  </button>
+                )}
+              </div>
+            )}
+          </section>
+        ) : (
+          <section aria-labelledby={scheduledHeading} className="stack">
+            <h2 id={scheduledHeading} className="cover-big">
+              Rest day
+            </h2>
+            {active && (
+              <div className="cover-actions">
+                <button type="button" className="primary" onClick={() => navigate('/session')}>
+                  Resume <span className="visually-hidden">{active.templateName}</span>{' '}
+                  <span aria-hidden="true">›</span>
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
 
       {pending && active && (
         <div role="alertdialog" aria-label="Session in progress" className="card stack">
@@ -105,60 +204,46 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
         </div>
       )}
 
-      {doneToday ? (
-        <section aria-label="Workout complete" className="card stack done-card">
-          <h2>Workout complete ✓</h2>
-          <p className="history-name">{doneToday.name}</p>
-          <p className="muted">{historySummary(doneToday)}</p>
-          <p>Nice work. Rest up and refuel.</p>
-          <Link to={`/history/session/${doneToday.id}`} className="button-like">
-            See details
-          </Link>
-        </section>
-      ) : scheduled ? (
-        <section aria-labelledby={scheduledHeading} className="card stack">
-          <h2 id={scheduledHeading}>{scheduled.name}</h2>
-          <p className="muted">{summary(scheduled)}</p>
-          <button
-            type="button"
-            className="primary"
-            onClick={() => void start(scheduledId, scheduled.name)}
-          >
-            Start {scheduled.name}
-          </button>
-          {canPush && !confirmPush && (
-            <button type="button" onClick={() => setConfirmPush(true)}>
-              Can't train today
-            </button>
-          )}
-          {canPush && confirmPush && (
-            <div role="alertdialog" aria-label="Push back a day?" className="stack">
-              <p>
-                {scheduled.name} moves to tomorrow and the rest of the week shifts one day.{' '}
-                {restDaysLeft} rest {restDaysLeft === 1 ? 'day' : 'days'} left this week; this uses
-                1. Resets Monday.
-              </p>
-              <button
-                type="button"
-                className="primary"
-                onClick={() => void pushBackToday(db, now).then(() => setConfirmPush(false))}
-              >
-                Push back a day
-              </button>
-              <button type="button" onClick={() => setConfirmPush(false)}>
-                Cancel
-              </button>
-            </div>
-          )}
-        </section>
-      ) : (
-        <section className="card">
-          <h2>Rest day</h2>
-        </section>
-      )}
+      <section aria-label="This week">
+        <ol className="week-strip">
+          {week.map((d) => (
+            <li key={d.date} className={d.date === today ? 'today' : undefined}>
+              <span aria-hidden="true">{d.letter}</span>
+              <span className={`week-day ${d.state}${d.state === 'rest' ? ' tone' : ''}`}>
+                {d.state === 'done' && <span aria-hidden="true">✓</span>}
+              </span>
+              <span className="visually-hidden">
+                {d.name}: {d.state === 'done' ? 'trained' : d.state === 'rest' ? 'rest' : 'planned'}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="legend">Solid = trained · dotted = rest day</p>
+      </section>
+
+      <dl className="stat-row">
+        <div className={kcalLeft < 0 ? 'stat-cell accent' : 'stat-cell'}>
+          <dt>{kcalLeft < 0 ? 'Kcal over' : 'Kcal left'}</dt>
+          <dd>{Math.abs(kcalLeft).toLocaleString('en-US')}</dd>
+        </div>
+        <div className="stat-cell">
+          <dt>Weight</dt>
+          <dd>
+            {weight ? (
+              <>
+                {weight.kg} <small>kg</small>
+              </>
+            ) : (
+              '–'
+            )}
+          </dd>
+        </div>
+      </dl>
 
       <section aria-labelledby={othersHeading} className="stack">
-        <h2 id={othersHeading}>Start a different session</h2>
+        <h2 id={othersHeading} className="tag-heading">
+          Start a different session
+        </h2>
         {others.map(([id, template]) => (
           <button key={id} type="button" onClick={() => void start(id, template.name)}>
             {template.name}

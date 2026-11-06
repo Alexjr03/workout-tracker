@@ -93,20 +93,19 @@ export function BodyScreen({ now = new Date() }: { now?: Date }) {
 
   return (
     <div className="stack">
-      <h1>Body</h1>
-
-      <section className="card stack" aria-label="Summary">
+      <section className="cover stack" aria-label="Summary">
+        <h1 className="cover-meta">Body</h1>
         {!latest || !nextWeighIn ? (
           <p className="muted">Log your first weigh-in. Once a week is enough.</p>
         ) : (
           <>
-            <p className="muted">Latest weigh-in</p>
+            <p className="cover-meta">Latest weigh-in</p>
             <p className="stat">{latest.kg} kg</p>
-            <p className="muted">{formatDayLabel(latest.date)}</p>
+            <p className="cover-meta">{formatDayLabel(latest.date)}</p>
             {previous && <p>{signed(latest.kg - previous.kg)} kg since last weigh-in</p>}
             <p>{signed(latest.kg - settings.startingWeightKg)} kg since start</p>
             <p>{Math.max(0, latest.kg - settings.goalWeightKg).toFixed(1)} kg to goal</p>
-            <p className={nextWeighIn <= today ? 'banner' : 'muted'}>
+            <p className={nextWeighIn <= today ? 'banner' : 'cover-meta'}>
               {nextWeighIn <= today
                 ? 'Weigh-in due today'
                 : `Next weigh-in: ${formatDayLabel(nextWeighIn)}`}
@@ -142,7 +141,7 @@ export function BodyScreen({ now = new Date() }: { now?: Date }) {
       />
 
       <section className="stack" aria-label="Entries">
-        <h2>Entries</h2>
+        <h2 className="tag-heading">Entries</h2>
         {entries.length === 0 ? (
           <p className="muted">No entries yet.</p>
         ) : (

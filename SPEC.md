@@ -195,7 +195,7 @@ Dexie indexes: `setLogs` on `[exerciseId+completedAt]` and `sessionId`; `session
 - Installs to the iPhone Home Screen. Manifest has `display: standalone`, theme color, name "Workout", and a 180px `apple-touch-icon`.
 - After the first load, every screen works in airplane mode, including a cold start.
 - Bottom navigation has 5 tabs: **Today · History · Body · Food · Settings**. Tab targets are ≥ 56 px tall and sit within thumb reach.
-- High-contrast dark theme by default. Body text is ≥ 17 px, with ≥ 7:1 contrast for primary text and ≥ 4.5:1 for secondary text.
+- Ink theme (manga style): paper-white background, black ink, one red for the main action. Big slanted black "cover" blocks head Today, Food and Body; screentone dots only mark something (rest days, calories left, the area under the weight line). Anything with a black box or a › can be tapped. Fonts (Anton, Zen Kaku Gothic New, latin only) are bundled for offline use. Body text is ≥ 17 px, with ≥ 7:1 contrast for primary text and ≥ 4.5:1 for secondary text.
 - Respects the iOS safe-area insets (`env(safe-area-inset-*)`).
 - When a new version is available, shows a small "Update ready" prompt. It never reloads during an active session.
 

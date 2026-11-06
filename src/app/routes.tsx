@@ -1,3 +1,11 @@
+import {
+  IconBowl,
+  IconCalendar,
+  IconScale,
+  IconSettings,
+  IconSun,
+  type Icon,
+} from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import { BodyScreen } from '../features/body/BodyScreen';
 import { FoodScreen } from '../features/food/FoodScreen';
@@ -15,15 +23,16 @@ import { TodayScreen } from '../features/today/TodayScreen';
 export interface Tab {
   path: string;
   label: string;
+  icon: Icon;
   element: ReactNode;
 }
 
 export const TABS: Tab[] = [
-  { path: '/', label: 'Today', element: <TodayScreen /> },
-  { path: '/history', label: 'History', element: <HistoryList /> },
-  { path: '/body', label: 'Body', element: <BodyScreen /> },
-  { path: '/food', label: 'Food', element: <FoodScreen /> },
-  { path: '/settings', label: 'Settings', element: <SettingsScreen /> },
+  { path: '/', label: 'Today', icon: IconSun, element: <TodayScreen /> },
+  { path: '/history', label: 'History', icon: IconCalendar, element: <HistoryList /> },
+  { path: '/body', label: 'Body', icon: IconScale, element: <BodyScreen /> },
+  { path: '/food', label: 'Food', icon: IconBowl, element: <FoodScreen /> },
+  { path: '/settings', label: 'Settings', icon: IconSettings, element: <SettingsScreen /> },
 ];
 
 /** Screens reached from a tab rather than the nav bar. */

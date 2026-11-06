@@ -258,6 +258,22 @@ export function SessionRunner() {
         </button>
       </header>
 
+      {/* One segment per exercise: black = done, red = now, dotted = still to do. */}
+      <div className="runner-progress" aria-hidden="true">
+        {data.slots.map((s, i) => (
+          <span
+            key={s.slot.id}
+            className={
+              i === data.exerciseIndex
+                ? 'current'
+                : s.sets.length >= requiredSets(s.slot)
+                  ? 'done'
+                  : 'tone'
+            }
+          />
+        ))}
+      </div>
+
       {confirmFinish && (
         <div role="alertdialog" aria-label="Finish session?" className="card stack">
           <p>{setsMissing} sets not done. Finish anyway?</p>

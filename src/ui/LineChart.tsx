@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 export interface ChartPoint {
   x: number;
@@ -49,6 +49,7 @@ export function LineChart({
   shadedRanges = [],
 }: LineChartProps) {
   const [selected, setSelected] = useState<string | null>(null);
+  const toneId = useId();
   const all = series.flatMap((s) => s.points);
   if (all.length === 0) return <p className="muted">No data yet.</p>;
 
@@ -83,6 +84,12 @@ export function LineChart({
         width="100%"
         className="chart-svg"
       >
+        {/* Screentone under a lone line, like manga shading. */}
+        <defs>
+          <pattern id={toneId} width="6" height="6" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="1.1" className="chart-tone-dot" />
+          </pattern>
+        </defs>
         {shadedRanges.map((r) => (
           <g key={`${r.from}-${r.to}`}>
             <rect
@@ -139,6 +146,19 @@ export function LineChart({
 
         {series.map((s) => (
           <g key={s.name} className={`chart-${s.tone}`}>
+            {series.length === 1 && s.points.length > 1 && (
+              <path
+                className="chart-area"
+                fill={`url(#${toneId})`}
+                d={`${s.points
+                  .map(
+                    (p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`,
+                  )
+                  .join(' ')} L${sx(s.points.at(-1)?.x ?? x1).toFixed(1)},${H - PAD.bottom} L${sx(
+                  s.points[0]?.x ?? x0,
+                ).toFixed(1)},${H - PAD.bottom} Z`}
+              />
+            )}
             {s.points.length > 1 && (
               <path
                 className="chart-line"

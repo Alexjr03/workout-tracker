@@ -15,6 +15,23 @@ import { ImportButton } from './backup/ImportButton';
 
 const RESET_WORD = 'RESET';
 
+/** Row that opens another screen: boxed with a chevron so it reads as tappable. */
+function NavRow({ to, title, hint }: { to: string; title: string; hint: string }) {
+  return (
+    <Link to={to} className="nav-row">
+      <span className="nav-row-text">
+        <span className="nav-row-title">{title}</span>
+        <span className="nav-row-hint" aria-hidden="true">
+          {hint}
+        </span>
+      </span>
+      <span className="nav-row-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
+  );
+}
+
 function ResetSection() {
   const [confirming, setConfirming] = useState(false);
   const [typed, setTyped] = useState('');
@@ -29,8 +46,8 @@ function ResetSection() {
   }
 
   return (
-    <section className="card stack" aria-label="Reset">
-      <h2>Reset</h2>
+    <section className="stack settings-section" aria-label="Reset">
+      <h2 className="tag-heading">Reset</h2>
       <p className="muted">
         Puts the routine, exercises and these settings back to the original values. Workouts, body
         weight and food logs are kept.
@@ -102,8 +119,24 @@ export function SettingsScreen() {
         </p>
       )}
 
-      <section className="card stack" aria-label="Program">
-        <h2>Program</h2>
+      <section className="stack settings-section" aria-label="Routine">
+        <h2 className="tag-heading">Routine</h2>
+        <NavRow to="/settings/exercises" title="Exercises" hint="Units (kg/lb), steps, videos" />
+        <NavRow to="/settings/schedule" title="Weekly schedule" hint="Which session on which day" />
+        {Object.entries(routine?.sessions ?? {})
+          .filter(([, template]) => 'exercises' in template)
+          .map(([id, template]) => (
+            <NavRow
+              key={id}
+              to={`/settings/sessions/${id}`}
+              title={template.name}
+              hint="Exercises, sets and reps"
+            />
+          ))}
+      </section>
+
+      <section className="stack settings-section" aria-label="Program">
+        <h2 className="tag-heading">Program</h2>
         <div className="field">
           <label htmlFor={dateId}>Program start date</label>
           <input
@@ -124,8 +157,8 @@ export function SettingsScreen() {
         />
       </section>
 
-      <section className="card stack" aria-label="Rest times">
-        <h2>Rest times</h2>
+      <section className="stack settings-section" aria-label="Rest times">
+        <h2 className="tag-heading">Rest times</h2>
         <Stepper
           label="Compound rest"
           unit="s"
@@ -152,8 +185,8 @@ export function SettingsScreen() {
         </label>
       </section>
 
-      <section className="card stack" aria-label="Targets">
-        <h2>Targets</h2>
+      <section className="stack settings-section" aria-label="Targets">
+        <h2 className="tag-heading">Targets</h2>
         <Stepper
           label="Calorie max"
           unit="kcal"
@@ -185,25 +218,10 @@ export function SettingsScreen() {
         />
       </section>
 
-      <section className="card stack" aria-label="Routine">
-        <h2>Routine</h2>
-        <Link to="/settings/schedule" className="button-like">
-          Weekly schedule
-        </Link>
-        <Link to="/settings/exercises" className="button-like">
-          Exercises
-        </Link>
-        {Object.entries(routine?.sessions ?? {})
-          .filter(([, template]) => 'exercises' in template)
-          .map(([id, template]) => (
-            <Link key={id} to={`/settings/sessions/${id}`} className="button-like">
-              {template.name}
-            </Link>
-          ))}
-      </section>
-
-      <section aria-labelledby={backupHeading} className="card stack">
-        <h2 id={backupHeading}>Backup</h2>
+      <section aria-labelledby={backupHeading} className="stack settings-section">
+        <h2 id={backupHeading} className="tag-heading">
+          Backup
+        </h2>
         <p className="muted">
           Everything lives only on this phone. Export a copy to Files or iCloud now and then.
         </p>

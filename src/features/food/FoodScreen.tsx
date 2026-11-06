@@ -46,47 +46,49 @@ export function FoodScreen({ now = new Date() }: { now?: Date }) {
 
   return (
     <div className="stack">
-      <h1>Food</h1>
-      <div className="day-nav">
-        <button type="button" aria-label="Previous day" onClick={() => setDay(addDays(day, -1))}>
-          ‹
-        </button>
-        <span>{formatDayLabel(day)}</span>
-        <button
-          type="button"
-          aria-label="Next day"
-          disabled={day >= today}
-          onClick={() => setDay(addDays(day, 1))}
-        >
-          ›
-        </button>
-      </div>
-
-      <section className="card stack" aria-label="Day total">
-        <p className="stat">
-          {fmt(eaten)} / {fmt(max)} kcal
-        </p>
-        <div
-          role="progressbar"
-          aria-label="Calories"
-          aria-valuemin={0}
-          aria-valuemax={max}
-          aria-valuenow={eaten}
-          className={over ? 'progress over' : 'progress'}
-        >
-          <div style={{ width: `${Math.min(100, (eaten / max) * 100)}%` }} />
+      <div className="cover stack">
+        <h1 className="cover-meta">Food</h1>
+        <div className="day-nav">
+          <button type="button" aria-label="Previous day" onClick={() => setDay(addDays(day, -1))}>
+            ‹
+          </button>
+          <span>{formatDayLabel(day)}</span>
+          <button
+            type="button"
+            aria-label="Next day"
+            disabled={day >= today}
+            onClick={() => setDay(addDays(day, 1))}
+          >
+            ›
+          </button>
         </div>
-        <p>
-          {over ? '−' : ''}
-          {fmt(Math.abs(remaining))} remaining
-        </p>
-        {over && <p className="error">Over your maximum</p>}
-        {target !== null && (
-          <p>
-            Protein {fmt(protein)} / {fmt(target)} g
+
+        <section className="stack" aria-label="Day total">
+          <p className="stat">
+            {fmt(eaten)} / {fmt(max)} kcal
           </p>
-        )}
-      </section>
+          <div
+            role="progressbar"
+            aria-label="Calories"
+            aria-valuemin={0}
+            aria-valuemax={max}
+            aria-valuenow={eaten}
+            className={over ? 'progress over' : 'progress'}
+          >
+            <div style={{ width: `${Math.min(100, (eaten / max) * 100)}%` }} />
+          </div>
+          <p>
+            {over ? '−' : ''}
+            {fmt(Math.abs(remaining))} remaining
+          </p>
+          {over && <p className="banner">Over your maximum</p>}
+          {target !== null && (
+            <p>
+              Protein {fmt(protein)} / {fmt(target)} g
+            </p>
+          )}
+        </section>
+      </div>
 
       <SavedFoods day={day} withProtein={target !== null} />
 
