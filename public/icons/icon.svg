@@ -1,11 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#000"/>
-  <!-- Dumbbell, kept inside the central 80% so it survives maskable cropping. -->
-  <g fill="#ffd60a">
-    <rect x="96" y="176" width="48" height="160" rx="12"/>
-    <rect x="152" y="208" width="40" height="96" rx="10"/>
-    <rect x="368" y="176" width="48" height="160" rx="12"/>
-    <rect x="320" y="208" width="40" height="96" rx="10"/>
-    <rect x="192" y="240" width="128" height="32" rx="8"/>
+  <!-- Ink theme: black page, screentone corner, slanted red panel, inked dumbbell. -->
+  <defs>
+    <pattern id="tone" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="3" fill="#fff"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="#111"/>
+  <polygon points="200,0 512,0 512,300" fill="url(#tone)" opacity="0.3"/>
+  <polygon points="0,300 512,190 512,360 0,470" fill="#c8161f"/>
+  <polygon points="0,300 512,190 512,206 0,316" fill="#fff"/>
+  <!-- Dumbbell kept inside the central 80% so it survives maskable cropping. -->
+  <g transform="translate(0 24) rotate(-12 256 280)" fill="#fff" stroke="#111" stroke-width="10" stroke-linejoin="miter">
+    <rect x="86" y="196" width="56" height="168"/>
+    <rect x="142" y="226" width="44" height="108"/>
+    <rect x="370" y="196" width="56" height="168"/>
+    <rect x="326" y="226" width="44" height="108"/>
+    <rect x="186" y="262" width="140" height="36"/>
   </g>
 </svg>

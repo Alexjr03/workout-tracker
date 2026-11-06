@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../../db/schema';
 import { discardSession, finishSession, startSession } from '../../db/repos/sessions';
 import { completeSet } from '../../db/repos/sets';
@@ -96,6 +96,22 @@ describe('TodayScreen', () => {
     renderToday('2026-11-24');
     await userEvent.click(await screen.findByRole('button', { name: 'Resume Legs' }));
     expect(await screen.findByRole('heading', { name: 'Session runner' })).toBeInTheDocument();
+  });
+
+  it("discards an unwanted session after asking, which brings back Can't train today", async () => {
+    const id = await startSession(db, 'legs', new Date(2026, 10, 24, 18));
+    renderToday('2026-11-24');
+    expect(screen.queryByRole('button', { name: "Can't train today" })).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('button', { name: 'Discard Legs' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Keep it' }));
+    expect((await db.sessions.get(id))?.status).toBe('active');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Discard Legs' }));
+    const dialog = screen.getByRole('alertdialog', { name: 'Discard Legs?' });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Discard session' }));
+    await vi.waitFor(async () => expect((await db.sessions.get(id))?.status).toBe('discarded'));
+    expect(await screen.findByRole('button', { name: "Can't train today" })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Resume Legs' })).not.toBeInTheDocument();
   });
 
   it('asks before replacing an active session, and can cancel', async () => {

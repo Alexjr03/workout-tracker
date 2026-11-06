@@ -29,6 +29,7 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
   const today = toLocalDate(now);
   const [pending, setPending] = useState<{ id: string; name: string } | null>(null);
   const [confirmPush, setConfirmPush] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const scheduledHeading = useId();
   const othersHeading = useId();
 
@@ -189,6 +190,37 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
           </section>
         )}
       </div>
+
+      {active &&
+        !pending &&
+        (confirmDiscard ? (
+          <div
+            role="alertdialog"
+            aria-label={`Discard ${active.templateName}?`}
+            className="card stack"
+          >
+            <p>
+              Discard {active.templateName}? Sets logged in it won&apos;t count in History or
+              progress.
+            </p>
+            <button
+              type="button"
+              className="danger"
+              onClick={() =>
+                void discardSession(db, active.id).then(() => setConfirmDiscard(false))
+              }
+            >
+              Discard session
+            </button>
+            <button type="button" onClick={() => setConfirmDiscard(false)}>
+              Keep it
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="danger" onClick={() => setConfirmDiscard(true)}>
+            Discard {active.templateName}
+          </button>
+        ))}
 
       {pending && active && (
         <div role="alertdialog" aria-label="Session in progress" className="card stack">
