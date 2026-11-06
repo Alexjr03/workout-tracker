@@ -98,7 +98,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 ### Phase 9: Owner feedback (added 2026-11-06)
 - [x] T25: "Workout complete" on Today
 - [x] T26: Last-time weights on every set
-- [ ] T27: Push back a day
+- [x] T27: Push back a day
 - [ ] T28: Swap suggestions by muscle group
 - [ ] T29: kg or lb per exercise
 - [ ] T30: How-to videos (embedded YouTube)

@@ -210,7 +210,7 @@ Dexie indexes: `setLogs` on `[exerciseId+completedAt]` and `sessionId`; `session
 
 Pure domain functions with full unit test coverage:
 
-- **`sessionForDate(date, routine)`** returns the template id for that weekday or `'rest'`.
+- **`sessionForDate(date, routine, pushBacks)`** returns the template id for that weekday or `'rest'`. *(Added 2026-11-06 at the owner's request:)* **Can't train today** on Today makes today a rest day and moves the rest of that week one day later, using up the next rest day after it. Allowed while a rest day is left after today (twice with the seed week), not on a rest day, not with a session in progress or after training today. Push-backs only apply to their own Mon–Sun week, so the schedule resets every Monday.
 - **`prescriptionFor(template exercise, date, settings)`** returns:
   - Ramp-up applies while `date < programStartDate + rampUpWeeks × 7 days` (days 0–13 by default). During ramp-up, all sets are prescribed, but **the last set is optional** (`optionalSets = 1` when `sets > 1`, else 0), and `rirTarget = '~3'`. *(Changed 2026-11-03 at the owner's request; it was `sets − 1`.)*
   - Otherwise, `sets` is unchanged, `optionalSets = 0` and `rirTarget = '1-2'`.

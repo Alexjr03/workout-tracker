@@ -2,12 +2,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useId, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { listHistory } from '../../db/repos/history';
+import { pushBackToday } from '../../db/repos/settings';
 import { discardSession, getActiveSession, startSession } from '../../db/repos/sessions';
 import { db } from '../../db/schema';
 import type { SessionTemplate } from '../../db/types';
 import { daysBetween, formatDayLabel, toLocalDate } from '../../domain/dates';
 import { prescriptionFor } from '../../domain/rampUp';
-import { sessionForDate } from '../../domain/schedule';
+import { canPushBack, pushBacksLeft, sessionForDate, weekStart } from '../../domain/schedule';
 import { historySummary } from '../history/HistoryList';
 import { BackupNudge } from './BackupNudge';
 
@@ -24,6 +25,7 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
   const navigate = useNavigate();
   const today = toLocalDate(now);
   const [pending, setPending] = useState<{ id: string; name: string } | null>(null);
+  const [confirmPush, setConfirmPush] = useState(false);
   const scheduledHeading = useId();
   const othersHeading = useId();
 
@@ -39,7 +41,10 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
   if (!data?.settings || !data.routine) return null;
   const { settings, routine, active, doneToday } = data;
 
-  const scheduledId = sessionForDate(today, routine);
+  const pushBacks = (settings.pushBacks ?? []).filter((d) => weekStart(d) === weekStart(today));
+  const scheduledId = sessionForDate(today, routine, pushBacks);
+  const restDaysLeft = pushBacksLeft(today, routine, pushBacks);
+  const canPush = !doneToday && !active && canPushBack(today, routine, pushBacks);
   const scheduled = scheduledId === 'rest' ? undefined : routine.sessions[scheduledId];
   const others = Object.entries(routine.sessions).filter(([id]) => id !== scheduledId);
   const { rampUp } = prescriptionFor({ sets: 1, repMin: 1, repMax: 1 }, today, settings);
@@ -72,6 +77,12 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
         {rampUp && (
           <p className="banner">
             Ramp-up week {rampUpWeek} of {settings.rampUpWeeks}
+          </p>
+        )}
+        {pushBacks.length > 0 && (
+          <p className="muted">
+            Week pushed back {pushBacks.length} {pushBacks.length === 1 ? 'day' : 'days'} · resets
+            Monday
           </p>
         )}
       </header>
@@ -115,6 +126,30 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
           >
             Start {scheduled.name}
           </button>
+          {canPush && !confirmPush && (
+            <button type="button" onClick={() => setConfirmPush(true)}>
+              Can't train today
+            </button>
+          )}
+          {canPush && confirmPush && (
+            <div role="alertdialog" aria-label="Push back a day?" className="stack">
+              <p>
+                {scheduled.name} moves to tomorrow and the rest of the week shifts one day.{' '}
+                {restDaysLeft} rest {restDaysLeft === 1 ? 'day' : 'days'} left this week; this uses
+                1. Resets Monday.
+              </p>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => void pushBackToday(db, now).then(() => setConfirmPush(false))}
+              >
+                Push back a day
+              </button>
+              <button type="button" onClick={() => setConfirmPush(false)}>
+                Cancel
+              </button>
+            </div>
+          )}
         </section>
       ) : (
         <section className="card">

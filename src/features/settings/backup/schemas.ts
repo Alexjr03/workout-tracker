@@ -23,6 +23,7 @@ const settings = z.object({
   startingWeightKg: positive,
   programStartDate: localDate,
   lastExportAt: z.string().nullable(),
+  pushBacks: z.array(localDate).optional(),
 });
 
 const routine = z.object({

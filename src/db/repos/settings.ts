@@ -1,4 +1,5 @@
-import { isLocalDate } from '../../domain/dates';
+import { isLocalDate, toLocalDate } from '../../domain/dates';
+import { canPushBack, sessionForDate, weekStart } from '../../domain/schedule';
 import type { WorkoutDb } from '../schema';
 import { buildSeed } from '../seed';
 import type { Settings } from '../types';
@@ -55,5 +56,35 @@ export async function resetToSeed(db: WorkoutDb, now = new Date()): Promise<void
     });
     await db.routine.put(seed.routine);
     await db.exercises.bulkPut(seed.exercises);
+  });
+}
+
+/**
+ * "Can't train today": makes today a rest day and moves the rest of the week one day later,
+ * using up a rest day. Push-backs from earlier weeks are dropped (the schedule resets Monday).
+ */
+export async function pushBackToday(db: WorkoutDb, now = new Date()): Promise<void> {
+  const today = toLocalDate(now);
+  await db.transaction('rw', db.settings, db.routine, db.sessions, async () => {
+    const [settings, routine, sessionsToday] = await Promise.all([
+      db.settings.get('settings'),
+      db.routine.get('routine'),
+      db.sessions.where('date').equals(today).toArray(),
+    ]);
+    if (!settings || !routine) throw new Error('App data is not seeded');
+    if (sessionsToday.some((s) => s.status === 'active')) {
+      throw new SettingsError('Finish or discard the session in progress first.');
+    }
+    if (sessionsToday.some((s) => s.status === 'finished')) {
+      throw new SettingsError("You've already trained today.");
+    }
+    const thisWeek = (settings.pushBacks ?? []).filter((d) => weekStart(d) === weekStart(today));
+    if (sessionForDate(today, routine, thisWeek) === 'rest') {
+      throw new SettingsError('Today is already a rest day.');
+    }
+    if (!canPushBack(today, routine, thisWeek)) {
+      throw new SettingsError('No rest day left to use this week.');
+    }
+    await db.settings.update('settings', { pushBacks: [...thisWeek, today] });
   });
 }

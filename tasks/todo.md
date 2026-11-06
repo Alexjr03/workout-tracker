@@ -485,7 +485,7 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Files:** `src/features/session/SessionRunner.tsx`(+test), `e2e/session.spec.ts`
 **Scope:** S
 
-### - [ ] T27: Push back a day
+### - [x] T27: Push back a day
 **Description:** "Can't train today" on Today makes today a rest day and moves the rest of the week's sessions one day later, using up a weekend rest day. Allowed up to 2 times per week (one per rest day available after today). Resets every Monday to the normal schedule.
 
 **Acceptance criteria:**

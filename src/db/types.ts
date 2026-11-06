@@ -23,6 +23,8 @@ export interface Settings {
   startingWeightKg: number;
   programStartDate: LocalDate;
   lastExportAt: string | null;
+  /** Days this week that were pushed back ("can't train today"); only the current week counts. */
+  pushBacks?: LocalDate[];
 }
 
 export interface Routine {

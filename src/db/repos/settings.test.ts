@@ -4,7 +4,7 @@ import { db } from '../schema';
 import { swapExercise } from './exercises';
 import { finishSession, startSession } from './sessions';
 import { completeSet } from './sets';
-import { resetToSeed, SettingsError, updateSettings } from './settings';
+import { pushBackToday, resetToSeed, SettingsError, updateSettings } from './settings';
 
 beforeEach(async () => {
   await resetDb();
@@ -92,5 +92,43 @@ describe('resetToSeed', () => {
     expect(await db.exercises.get('hack-squat')).toMatchObject({ isCustom: true });
     expect(await db.sets.count()).toBe(1);
     expect(await db.sessions.count()).toBe(1);
+  });
+});
+
+describe('pushBackToday', () => {
+  const MON = new Date(2026, 10, 2, 9);
+  const TUE = new Date(2026, 10, 3, 9);
+
+  it('records the day, keeping only this week', async () => {
+    await db.settings.update('settings', { pushBacks: ['2026-10-26'] });
+    await pushBackToday(db, MON);
+    await pushBackToday(db, TUE);
+    expect((await settings()).pushBacks).toEqual(['2026-11-02', '2026-11-03']);
+  });
+
+  it('refuses when no rest day is left this week', async () => {
+    await pushBackToday(db, MON);
+    await pushBackToday(db, TUE);
+    await expect(pushBackToday(db, new Date(2026, 10, 4, 9))).rejects.toThrow(
+      new SettingsError('No rest day left to use this week.'),
+    );
+  });
+
+  it('refuses on a rest day', async () => {
+    await expect(pushBackToday(db, new Date(2026, 10, 7, 9))).rejects.toThrow(
+      new SettingsError('Today is already a rest day.'),
+    );
+  });
+
+  it('refuses while a session is in progress or after finishing one today', async () => {
+    const id = await startSession(db, 'upper-a', MON);
+    await expect(pushBackToday(db, MON)).rejects.toThrow(
+      new SettingsError('Finish or discard the session in progress first.'),
+    );
+    await finishSession(db, id, MON);
+    await expect(pushBackToday(db, MON)).rejects.toThrow(
+      new SettingsError("You've already trained today."),
+    );
+    expect((await settings()).pushBacks ?? []).toEqual([]);
   });
 });

@@ -168,3 +168,52 @@ describe('TodayScreen: workout complete', () => {
     expect(screen.queryByRole('region', { name: 'Workout complete' })).not.toBeInTheDocument();
   });
 });
+
+describe("TodayScreen: can't train today", () => {
+  it('pushes the week back a day after confirming', async () => {
+    const view = renderToday('2026-11-23');
+    await userEvent.click(await screen.findByRole('button', { name: "Can't train today" }));
+    const dialog = screen.getByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Upper A moves to tomorrow');
+    expect(dialog).toHaveTextContent('2 rest days left this week; this uses 1. Resets Monday.');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Push back a day' }));
+
+    expect(await screen.findByRole('heading', { name: 'Rest day' })).toBeInTheDocument();
+    expect(screen.getByText('Week pushed back 1 day · resets Monday')).toBeInTheDocument();
+    view.unmount();
+
+    renderToday('2026-11-24');
+    expect(await screen.findByRole('button', { name: 'Start Upper A' })).toBeInTheDocument();
+  });
+
+  it('can be cancelled', async () => {
+    renderToday('2026-11-23');
+    await userEvent.click(await screen.findByRole('button', { name: "Can't train today" }));
+    await userEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }),
+    );
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start Upper A' })).toBeInTheDocument();
+    expect((await db.settings.get('settings'))?.pushBacks ?? []).toEqual([]);
+  });
+
+  it('is not offered on a rest day, after training, or with no rest day left', async () => {
+    const rest = renderToday('2026-11-28');
+    await screen.findByRole('heading', { name: 'Rest day' });
+    expect(screen.queryByRole('button', { name: "Can't train today" })).not.toBeInTheDocument();
+    rest.unmount();
+
+    await db.settings.update('settings', { pushBacks: ['2026-11-23', '2026-11-24'] });
+    const full = renderToday('2026-11-25');
+    expect(await screen.findByRole('button', { name: 'Start Upper A' })).toBeInTheDocument();
+    expect(screen.getByText('Week pushed back 2 days · resets Monday')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: "Can't train today" })).not.toBeInTheDocument();
+    full.unmount();
+
+    const id = await startSession(db, 'legs', new Date(2026, 10, 26, 7));
+    await finishSession(db, id, new Date(2026, 10, 26, 8));
+    renderToday('2026-11-26');
+    await screen.findByRole('region', { name: 'Workout complete' });
+    expect(screen.queryByRole('button', { name: "Can't train today" })).not.toBeInTheDocument();
+  });
+});
