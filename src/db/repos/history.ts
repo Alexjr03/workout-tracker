@@ -1,4 +1,5 @@
 import type { LocalDate } from '../../domain/dates';
+import { weightIncreases, type ExerciseBest } from '../../domain/historyStats';
 import { loadBasisLabel } from '../../domain/session';
 import type { WorkoutDb } from '../schema';
 import type { RirTarget, SessionLog } from '../types';
@@ -141,4 +142,48 @@ export async function exerciseProgress(db: WorkoutDb, exerciseId: string) {
     });
   }
   return result;
+}
+
+// Map.groupBy needs iOS 17.4+; this works on older iPhones too.
+function groupBy<T>(items: T[], key: (item: T) => string): Map<string, T[]> {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const group = groups.get(key(item));
+    if (group) group.push(item);
+    else groups.set(key(item), [item]);
+  }
+  return groups;
+}
+
+/** Per finished session, the exercises where you lifted more than ever before (History list). */
+export async function weightIncreasesBySession(db: WorkoutDb) {
+  const [sessions, slots, sets, defs] = await Promise.all([
+    db.sessions.where('status').equals('finished').toArray(),
+    db.sessionExercises.toArray(),
+    db.sets.toArray(),
+    db.exercises.toArray(),
+  ]);
+  sessions.sort((a, b) => a.date.localeCompare(b.date) || a.startedAt.localeCompare(b.startedAt));
+  const defById = new Map(defs.map((d) => [d.id, d]));
+  const weightsBySlot = groupBy(sets, (s) => s.sessionExerciseId);
+  const slotsBySession = groupBy(slots, (s) => s.sessionId);
+
+  const bests: ExerciseBest[] = [];
+  for (const session of sessions) {
+    for (const slot of (slotsBySession.get(session.id) ?? []).sort((a, b) => a.order - b.order)) {
+      const weights = (weightsBySlot.get(slot.id) ?? []).map((s) => s.weight);
+      const def = defById.get(slot.exerciseId);
+      if (weights.length === 0 || !def) continue;
+      const lowerIsBetter = def.loadBasis === 'assistance';
+      bests.push({
+        sessionId: session.id,
+        exerciseId: def.id,
+        name: def.name,
+        unit: loadBasisLabel(def.loadBasis, def.unit),
+        weight: lowerIsBetter ? Math.min(...weights) : Math.max(...weights),
+        lowerIsBetter,
+      });
+    }
+  }
+  return weightIncreases(bests);
 }

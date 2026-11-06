@@ -95,6 +95,13 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
     return { date, letter, name: DAY_NAMES[i], state };
   });
   const kcalLeft = settings.calorieMax - eaten;
+  // Shown whenever a session is in progress, whatever else the cover says.
+  const resumeButton = active && (
+    <button type="button" className="primary" onClick={() => navigate('/session')}>
+      Resume <span className="visually-hidden">{active.templateName}</span>{' '}
+      <span aria-hidden="true">›</span>
+    </button>
+  );
 
   return (
     <div className="stack">
@@ -121,9 +128,12 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
             <h2 className="cover-big">{doneToday.name}</h2>
             <p className="cover-meta">{historySummary(doneToday)}</p>
             <p className="cover-meta">Nice work. Rest up and refuel.</p>
-            <Link to={`/history/session/${doneToday.id}`} className="button-like">
-              See details
-            </Link>
+            <div className="cover-actions">
+              {resumeButton}
+              <Link to={`/history/session/${doneToday.id}`} className="button-like">
+                See details
+              </Link>
+            </div>
           </section>
         ) : scheduled ? (
           <section aria-labelledby={scheduledHeading} className="stack">
@@ -153,12 +163,7 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
               </div>
             ) : (
               <div className="cover-actions">
-                {active && (
-                  <button type="button" className="primary" onClick={() => navigate('/session')}>
-                    Resume <span className="visually-hidden">{active.templateName}</span>{' '}
-                    <span aria-hidden="true">›</span>
-                  </button>
-                )}
+                {resumeButton}
                 <button
                   type="button"
                   className={active ? undefined : 'primary'}
@@ -180,14 +185,7 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
             <h2 id={scheduledHeading} className="cover-big">
               Rest day
             </h2>
-            {active && (
-              <div className="cover-actions">
-                <button type="button" className="primary" onClick={() => navigate('/session')}>
-                  Resume <span className="visually-hidden">{active.templateName}</span>{' '}
-                  <span aria-hidden="true">›</span>
-                </button>
-              </div>
-            )}
+            {active && <div className="cover-actions">{resumeButton}</div>}
           </section>
         )}
       </div>

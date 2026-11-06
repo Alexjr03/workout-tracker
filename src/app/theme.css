@@ -1143,3 +1143,69 @@ button[aria-pressed='true'] {
 .settings-section .muted {
   font-size: 15px;
 }
+
+/* History month: same marks as the Today week strip. */
+.month-title {
+  margin: 0;
+  font-size: 26px;
+}
+
+.month-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.month-weekday {
+  font-family: var(--font-display);
+  color: var(--text-dim);
+}
+
+.month-grid li {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.month-grid li.done {
+  background: var(--ink);
+  color: #fff;
+}
+
+.month-grid li.rest {
+  color: var(--text-dim);
+  background-color: var(--bg);
+}
+
+.month-grid li.rest span {
+  background: var(--bg);
+  padding: 0 3px;
+}
+
+.month-grid li.today {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+  color: var(--accent);
+}
+
+.month-grid li.done.today {
+  color: #fff;
+}
+
+.stat-row--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.history-pr {
+  flex-basis: 100%;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+}

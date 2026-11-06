@@ -311,6 +311,8 @@ Pure domain functions with full unit test coverage:
 ### `history`
 
 - Lists past sessions newest first, with date, name, set count and duration (or machine + minutes for cardio). Swapped exercises are marked.
+- **Month view** above the list: a Monday-first grid (solid = trained, dotted = scheduled rest day, red outline = today), ‹ › to change month (not past the current one), and the month's sessions, sets and **weight PRs**.
+- **Weight PR:** a session where an exercise's heaviest set beats every earlier session's (lightest for assisted exercises; the first time doesn't count). The session's row shows "↑ Exercise weight unit".
 - **Session detail:** every exercise with its sets (weight × reps), the RIR target shown, and any swap ("Leg press → Hack squat").
 - **Exercise progress:**
   - Pick any exercise, including custom swap exercises.

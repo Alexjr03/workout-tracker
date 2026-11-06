@@ -137,3 +137,62 @@ describe('SessionDetailScreen', () => {
     expect(await screen.findByText('Session not found.')).toBeInTheDocument();
   });
 });
+
+describe('HistoryList: month and weight PRs', () => {
+  const NOV_30 = new Date(2026, 10, 30, 20);
+
+  async function legPress(day: number, weight: number) {
+    const start = new Date(2026, 10, day, 18);
+    const id = await startSession(db, 'legs', start);
+    const slot = (await db.sessionExercises.where('sessionId').equals(id).toArray()).find(
+      (s) => s.exerciseId === 'leg-press',
+    );
+    if (!slot) throw new Error('fixture');
+    await completeSet(db, { slot, weight, reps: 10, now: start });
+    await completeSet(db, { slot, weight: weight - 10, reps: 10, now: start });
+    await finishSession(db, id, new Date(start.getTime() + 40 * 60_000));
+  }
+
+  function renderMonth() {
+    render(
+      <MemoryRouter>
+        <HistoryList now={NOV_30} />
+      </MemoryRouter>,
+    );
+  }
+
+  it('marks trained days, totals the month and flags a heavier leg press', async () => {
+    await legPress(17, 200);
+    await legPress(24, 230);
+    renderMonth();
+    expect(await screen.findByRole('heading', { name: 'November 2026' })).toBeInTheDocument();
+    expect(await screen.findByText('Tuesday, Nov 24: trained')).toBeInTheDocument();
+    expect(screen.getByText('Tuesday, Nov 17: trained')).toBeInTheDocument();
+
+    const totals = (label: string) =>
+      screen.getByText(label, { selector: 'dt' }).nextElementSibling?.textContent;
+    await waitFor(() => expect(totals('Sessions')).toBe('2'));
+    expect(totals('Sets')).toBe('4');
+    expect(totals('Weight PRs')).toBe('1');
+
+    const sessions = screen.getByRole('list', { name: 'Sessions' });
+    expect(within(sessions).getAllByText(/^↑ Leg press 230/)).toHaveLength(1);
+  });
+
+  it('moves between months but not into the future', async () => {
+    await legPress(24, 230);
+    renderMonth();
+    const next = await screen.findByRole('button', { name: 'Next month' });
+    expect(next).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: 'Previous month' }));
+    expect(await screen.findByRole('heading', { name: 'October 2026' })).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByText('Sessions', { selector: 'dt' }).nextElementSibling?.textContent).toBe(
+        '0',
+      ),
+    );
+    expect(screen.queryByText(/: trained$/)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Next month' }));
+    expect(await screen.findByRole('heading', { name: 'November 2026' })).toBeInTheDocument();
+  });
+});

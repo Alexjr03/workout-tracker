@@ -159,6 +159,14 @@ describe('TodayScreen: workout complete', () => {
     expect(within(done).getByText('Legs')).toBeInTheDocument();
   });
 
+  it('still offers Resume when another session was started after finishing', async () => {
+    await finishToday('upper-a');
+    await startSession(db, 'cardio', new Date(2026, 10, 23, 19));
+    renderToday('2026-11-23');
+    const done = await screen.findByRole('region', { name: 'Workout complete' });
+    expect(await within(done).findByRole('button', { name: 'Resume Cardio' })).toBeInTheDocument();
+  });
+
   it('ignores discarded sessions and sessions from other days', async () => {
     const id = await startSession(db, 'upper-a', new Date(2026, 10, 23, 18));
     await discardSession(db, id);
