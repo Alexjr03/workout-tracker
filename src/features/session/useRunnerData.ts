@@ -25,7 +25,7 @@ export interface RunnerData {
   /** Only for the current exercise: history used for its defaults. */
   current: {
     lastLoggedWeight: number | null;
-    lastTimeSets: { setIndex: number; reps: number }[];
+    lastTimeSets: { setIndex: number; weight: number; reps: number }[];
     startingLoad: number | null;
   } | null;
 }

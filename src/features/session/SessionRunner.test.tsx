@@ -377,3 +377,29 @@ describe('SessionRunner: optional ramp-up set', () => {
     expect(await screen.findByRole('heading', { name: `Summary ${id}` })).toBeInTheDocument();
   });
 });
+
+describe('SessionRunner: last time', () => {
+  it("shows last session's sets for the exercise next to the suggestion", async () => {
+    const first = await startSession(db, 'upper-a', MON);
+    const [bench] = await slotsOf(first);
+    if (!bench) throw new Error('fixture');
+    await completeSet(db, { slot: bench, weight: 10, reps: 10 });
+    await completeSet(db, { slot: bench, weight: 10, reps: 10 });
+    await completeSet(db, { slot: bench, weight: 10, reps: 10 });
+    await db.sessions.update(first, { status: 'finished', finishedAt: MON.toISOString() });
+    await db.activeSession.clear();
+
+    await startSession(db, 'upper-a', new Date(2026, 10, 30, 18));
+    renderRunner();
+    expect(await screen.findByText('Last time: 10 × 10 · 10 × 10 · 10 × 10')).toBeInTheDocument();
+    expect(screen.getByText(/↑ 12.5 lb\/side/)).toBeInTheDocument();
+    expect(weight()).toHaveValue('12.5');
+  });
+
+  it('shows nothing without history', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    expect(screen.queryByText(/^Last time/)).not.toBeInTheDocument();
+  });
+});

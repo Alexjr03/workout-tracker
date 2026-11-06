@@ -115,7 +115,7 @@ button.danger {
 .runner {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);
 }
 

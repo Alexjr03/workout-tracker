@@ -92,6 +92,15 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
         <p className="muted">
           {slot.repMin}–{slot.repMax} reps · {rirText(slot.rirTarget)}
         </p>
+        {history.lastTimeSets.length > 0 && (
+          <p className="muted">
+            Last time:{' '}
+            {[...history.lastTimeSets]
+              .sort((a, b) => a.setIndex - b.setIndex)
+              .map((s) => `${s.weight} × ${s.reps}`)
+              .join(' · ')}
+          </p>
+        )}
         {setIndex === 0 && slot.suggestedWeight !== null && (
           <p className="banner">
             {def.loadBasis === 'assistance' ? '↓' : '↑'} {slot.suggestedWeight} {unit}: you hit{' '}
@@ -101,6 +110,7 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
       </div>
 
       <Stepper
+        hideLabel
         label="Weight"
         unit={unit}
         step={def.increment}
@@ -108,7 +118,9 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
         onChange={(w) => change({ weight: w, reps })}
       />
       <Stepper
+        hideLabel
         label="Reps"
+        unit="reps"
         step={1}
         min={1}
         value={reps}

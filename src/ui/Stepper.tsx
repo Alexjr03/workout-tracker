@@ -9,6 +9,8 @@ interface StepperProps {
   onChange: (value: number | null) => void;
   /** Report typed values when the field is left, not on every keystroke (for saved settings). */
   commitOnBlur?: boolean;
+  /** Keep the label for screen readers only, to save height (the unit says what it is). */
+  hideLabel?: boolean;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -30,13 +32,14 @@ export function Stepper({
   min = 0,
   onChange,
   commitOnBlur = false,
+  hideLabel = false,
 }: StepperProps) {
   // Text being typed; null when not editing, so outside changes always show.
   const [editing, setEditing] = useState<string | null>(null);
 
   return (
     <div className="stepper" role="group" aria-label={label}>
-      <span className="stepper-label">{label}</span>
+      <span className={hideLabel ? 'visually-hidden' : 'stepper-label'}>{label}</span>
       <div className="stepper-row">
         <button
           type="button"

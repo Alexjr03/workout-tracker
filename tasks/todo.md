@@ -472,7 +472,7 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Files:** `src/features/today/TodayScreen.tsx`(+test)
 **Scope:** S
 
-### - [ ] T26: Last-time weights on every set
+### - [x] T26: Last-time weights on every set
 **Description:** The runner shows what you did last time for the current exercise, e.g. "Last time: 10 × 10 · 10 × 10 · 10 × 9". The existing progression keeps pre-filling the next weight step when every set hit repMax, with the "↑" badge, so both last time and the increase are visible.
 
 **Acceptance criteria:**
