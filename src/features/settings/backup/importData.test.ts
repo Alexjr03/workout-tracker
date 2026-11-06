@@ -26,6 +26,7 @@ async function logSomething() {
     proteinG: null,
     createdAt: NOW.toISOString(),
   });
+  await db.savedFoods.put({ id: 'oats', name: 'Oats', kcal: 380, proteinG: 13, uses: 2 });
 }
 
 beforeEach(async () => {
@@ -89,6 +90,16 @@ describe('parseBackup', () => {
     const muscleOf = (id: string) => backup.data.exercises.find((e) => e.id === id)?.muscle;
     expect(muscleOf('leg-press')).toBe('quads');
     expect(muscleOf('hack-squat')).toBeNull();
+  });
+
+  it('upgrades a version 4 backup made before saved foods', async () => {
+    await logSomething();
+    const raw = JSON.parse(JSON.stringify(await buildBackup(db, NOW)));
+    raw.schemaVersion = 4;
+    delete raw.data.savedFoods;
+    const { backup } = parseBackup(JSON.stringify(raw));
+    expect(backup.data.savedFoods).toEqual([]);
+    expect(backup.data.food).toHaveLength(1);
   });
 
   it.each([

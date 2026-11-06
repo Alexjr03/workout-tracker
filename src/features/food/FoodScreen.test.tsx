@@ -93,3 +93,67 @@ describe('FoodScreen', () => {
     await vi.waitFor(async () => expect(await db.food.count()).toBe(0));
   });
 });
+
+describe('FoodScreen: my foods', () => {
+  const field = (name: string) => screen.getByRole('textbox', { name });
+
+  it('creates a food and logs it to the shown day with one tap', async () => {
+    await db.settings.update('settings', { proteinTargetG: 140 });
+    render(<FoodScreen now={NOV_6} />);
+    expect(await screen.findByText(/Save foods you eat often/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'New food' }));
+    const save = screen.getByRole('button', { name: 'Save food' });
+    expect(save).toBeDisabled();
+    await userEvent.type(field('Name'), 'Oats');
+    await userEvent.type(field('Food calories'), '380');
+    await userEvent.type(field('Food protein (g, optional)'), '13');
+    await userEvent.click(save);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Log Oats' }));
+    expect(await screen.findByText('380 / 1,500 kcal')).toBeInTheDocument();
+    expect(screen.getByText('Protein 13 / 140 g')).toBeInTheDocument();
+    const list = screen.getByRole('list', { name: 'Entries' });
+    expect(within(list).getByText('Oats · 380 kcal · 13 g protein')).toBeInTheDocument();
+  });
+
+  it('edits a food without changing what was already logged', async () => {
+    await db.savedFoods.put({ id: 'oats', name: 'Oats', kcal: 380, proteinG: null, uses: 0 });
+    render(<FoodScreen now={NOV_6} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Log Oats' }));
+    await screen.findByText('380 / 1,500 kcal');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Edit Oats' }));
+    await userEvent.clear(field('Food calories'));
+    await userEvent.type(field('Food calories'), '400');
+    await userEvent.click(screen.getByRole('button', { name: 'Save food' }));
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Log Oats' })).toHaveTextContent('400 kcal'),
+    );
+    expect(screen.getByText('380 / 1,500 kcal')).toBeInTheDocument();
+  });
+
+  it('asks before deleting a food, and can keep it', async () => {
+    await db.savedFoods.put({ id: 'oats', name: 'Oats', kcal: 380, proteinG: null, uses: 0 });
+    render(<FoodScreen now={NOV_6} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit Oats' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete food' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Keep' }));
+    expect(await db.savedFoods.count()).toBe(1);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete food' }));
+    const dialog = screen.getByRole('alertdialog', { name: 'Delete Oats?' });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
+    await vi.waitFor(async () => expect(await db.savedFoods.count()).toBe(0));
+    await vi.waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Log Oats' })).not.toBeInTheDocument(),
+    );
+  });
+
+  it('can cancel a new food', async () => {
+    render(<FoodScreen now={NOV_6} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'New food' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('group', { name: 'New food' })).not.toBeInTheDocument();
+    expect(await db.savedFoods.count()).toBe(0);
+  });
+});

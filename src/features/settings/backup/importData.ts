@@ -53,6 +53,10 @@ const MIGRATIONS: Record<number, (raw: Raw) => void> = {
       if (e.unit === 'kg' && e.increment === 5) e.increment = 2;
     }
   },
+  // v4 → v5: saved foods table added; older backups have none.
+  4: (raw) => {
+    if (raw.data) raw.data.savedFoods ??= [];
+  },
 };
 
 /** Reads and validates a backup file's text, upgrading older versions. Throws BackupError. */
@@ -115,6 +119,7 @@ export async function restoreBackup(db: WorkoutDb, backup: ValidBackup): Promise
     await db.cardio.bulkAdd(data.cardio);
     await db.bodyWeight.bulkAdd(data.bodyWeight);
     await db.food.bulkAdd(data.food);
+    await db.savedFoods.bulkAdd(data.savedFoods);
     await db.activeSession.bulkAdd(data.activeSession);
   });
 }

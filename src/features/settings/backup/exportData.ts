@@ -4,8 +4,9 @@ import { toLocalDate } from '../../../domain/dates';
 /**
  * Bump with every change to the export shape and add a migration in importData.ts.
  * v2: optional ramp-up sets. v3: exercise muscle groups. v4: unit per exercise.
+ * v5: saved foods.
  */
-export const BACKUP_SCHEMA_VERSION = 4;
+export const BACKUP_SCHEMA_VERSION = 5;
 
 export async function buildBackup(db: WorkoutDb, now = new Date()) {
   return db.transaction('r', db.tables, async () => ({
@@ -22,6 +23,7 @@ export async function buildBackup(db: WorkoutDb, now = new Date()) {
       cardio: await db.cardio.toArray(),
       bodyWeight: await db.bodyWeight.toArray(),
       food: await db.food.toArray(),
+      savedFoods: await db.savedFoods.toArray(),
       activeSession: await db.activeSession.toArray(),
     },
   }));

@@ -565,14 +565,16 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 
 ## Phase 10: More owner requests
 
-### - [ ] T32: Saved foods with custom calories
+### - [x] T32: Saved foods with custom calories
 **Description:** Save foods you eat often (name, kcal, optional protein) and log one with a single tap instead of looking up and typing the numbers each time. Food tab gets a "My foods" list above the manual entry; tapping a food adds it to the day. Foods are created, edited and deleted on the Food tab ("New food" form), and are included in the JSON backup.
 
 **Acceptance criteria:**
-- [ ] Create a food (name required, kcal > 0, protein optional); it appears in "My foods", sorted by most used.
-- [ ] One tap logs it to the shown day with its kcal (and protein when a target is set); Undo works as for other entries.
-- [ ] Editing a saved food doesn't change entries already logged; deleting asks first.
-- [ ] Dexie schema version adds a `foods` table (non-destructive); backup export/import includes it, with a backup schemaVersion bump and migration for older files.
+- [x] Create a food (name required, kcal > 0, protein optional); it appears in "My foods", sorted by most used.
+- [x] One tap logs it to the shown day with its kcal (and protein when a target is set); Undo works as for other entries.
+- [x] Editing a saved food doesn't change entries already logged; deleting asks first.
+- [x] Dexie schema version adds a `foods` table (non-destructive); backup export/import includes it, with a backup schemaVersion bump and migration for older files.
+
+**Notes (2026-11-06):** Table is `savedFoods` (Dexie v5; the existing `food` table holds entries). Entries copy the food's name and numbers when logged. Backup schemaVersion 5; v4 files import with no saved foods.
 
 **Verification:** `npm run check:full`
 **Dependencies:** T22, T14

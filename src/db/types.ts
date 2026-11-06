@@ -114,6 +114,18 @@ export interface FoodEntry {
   kcal: number;
   proteinG: number | null;
   createdAt: string;
+  /** Saved food's name at the time it was logged (copied, so later edits don't change it). */
+  name?: string;
+}
+
+/** A food saved for one-tap logging (T32). */
+export interface SavedFood {
+  id: string;
+  name: string;
+  kcal: number;
+  proteinG: number | null;
+  /** Times logged; "My foods" lists the most used first. */
+  uses: number;
 }
 
 /** UI state of the session in progress, so a killed app resumes exactly (T9, T10). */

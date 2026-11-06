@@ -52,6 +52,7 @@ describe('buildBackup', () => {
         'exercises',
         'food',
         'routine',
+        'savedFoods',
         'sessionExercises',
         'sessions',
         'sets',

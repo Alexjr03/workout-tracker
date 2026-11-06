@@ -105,6 +105,15 @@ const food = z.object({
   kcal: nonNegative,
   proteinG: nonNegative.nullable(),
   createdAt: z.string(),
+  name: z.string().optional(),
+});
+
+const savedFood = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  kcal: positive,
+  proteinG: nonNegative.nullable(),
+  uses: z.number().int().min(0),
 });
 
 const activeSession = z.object({
@@ -117,10 +126,10 @@ const activeSession = z.object({
   restEndsAt: z.string().nullable(),
 });
 
-/** Current export shape (schemaVersion 4). */
+/** Current export shape (schemaVersion 5). */
 export const backupSchema = z.object({
   app: z.literal('workout-tracker'),
-  schemaVersion: z.literal(4),
+  schemaVersion: z.literal(5),
   exportedAt: z.string(),
   data: z.object({
     settings: z.array(settings),
@@ -132,6 +141,7 @@ export const backupSchema = z.object({
     cardio: z.array(cardio),
     bodyWeight: z.array(bodyWeight),
     food: z.array(food),
+    savedFoods: z.array(savedFood),
     activeSession: z.array(activeSession),
   }),
 });

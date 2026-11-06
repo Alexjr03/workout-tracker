@@ -8,6 +8,7 @@ import type {
   ExerciseDef,
   FoodEntry,
   Routine,
+  SavedFood,
   SessionExerciseLog,
   SessionLog,
   SetLog,
@@ -24,6 +25,7 @@ export type WorkoutDb = Dexie & {
   cardio: EntityTable<CardioLog, 'id'>;
   bodyWeight: EntityTable<BodyWeightEntry, 'date'>;
   food: EntityTable<FoodEntry, 'id'>;
+  savedFoods: EntityTable<SavedFood, 'id'>;
   activeSession: EntityTable<ActiveSessionState, 'id'>;
 };
 
@@ -75,6 +77,8 @@ export function createDb(name = 'workout-tracker'): WorkoutDb {
         if (e.unit === 'kg' && e.increment === 5) e.increment = 2;
       }),
   );
+  // v5: saved foods for one-tap logging. New table only; nothing else changes.
+  db.version(5).stores({ savedFoods: 'id' });
   return db;
 }
 

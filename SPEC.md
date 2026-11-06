@@ -182,7 +182,8 @@ interface CardioLog {
 }
 
 interface BodyWeightEntry { date: LocalDate; kg: number }          // one per day
-interface FoodEntry { id: string; date: LocalDate; kcal: number; proteinG: number | null; createdAt: string }
+interface FoodEntry { id: string; date: LocalDate; kcal: number; proteinG: number | null; createdAt: string; name?: string }
+interface SavedFood { id: string; name: string; kcal: number; proteinG: number | null; uses: number }
 ```
 
 Dexie indexes: `setLogs` on `[exerciseId+completedAt]` and `sessionId`; `sessions` on `date` and `status`; `foodEntries` on `date`.
@@ -296,7 +297,7 @@ Pure domain functions with full unit test coverage:
 ### `backup`
 
 - **Export:**
-  - Builds `{ app: 'workout-tracker', schemaVersion, exportedAt, data: { settings, routine, exercises, sessions, sessionExercises, sets, cardio, bodyWeight, food } }`.
+  - Builds `{ app: 'workout-tracker', schemaVersion, exportedAt, data: { settings, routine, exercises, sessions, sessionExercises, sets, cardio, bodyWeight, food, savedFoods } }`.
   - On iOS, the file goes through the Share Sheet (`navigator.share({ files })`). Where that isn't available, it falls back to a download link.
   - Filename: `workout-backup-YYYY-MM-DD.json`.
   - Updates `lastExportAt`.
@@ -333,6 +334,7 @@ Pure domain functions with full unit test coverage:
 - Add entries with quick-add buttons (+100, +250, +500) plus a numeric field. Entries are listed and can be deleted (undo toast).
 - **Protein target** is blank by default and edited in Settings. When it's blank, protein UI is hidden. When it's set, each entry gets an optional protein (g) field, and the day view shows protein eaten / target.
 - Previous days can be browsed with ‹ › arrows.
+- **My foods**: saved foods (name, kcal, optional protein), most used first. One tap logs a copy to the shown day (protein only when a target is set), so editing or deleting a food never changes logged entries. Deleting a food asks first.
 
 ## Code Style
 

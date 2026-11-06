@@ -4,6 +4,7 @@ import { addFood, deleteFood, restoreFood } from '../../db/repos/food';
 import { db } from '../../db/schema';
 import type { FoodEntry } from '../../db/types';
 import { addDays, formatDayLabel, toLocalDate } from '../../domain/dates';
+import { SavedFoods } from './SavedFoods';
 
 const QUICK_ADD = [100, 250, 500];
 const fmt = (n: number) => n.toLocaleString('en-US');
@@ -87,6 +88,8 @@ export function FoodScreen({ now = new Date() }: { now?: Date }) {
         )}
       </section>
 
+      <SavedFoods day={day} withProtein={target !== null} />
+
       <section className="card stack" aria-label="Add food">
         <div className="row">
           {QUICK_ADD.map((n) => (
@@ -147,10 +150,11 @@ export function FoodScreen({ now = new Date() }: { now?: Date }) {
 
       <ul className="overview" aria-label="Entries">
         {entries.map((e) => {
-          const label =
+          const amount =
             target !== null && e.proteinG !== null
               ? `${fmt(e.kcal)} kcal · ${e.proteinG} g protein`
               : `${fmt(e.kcal)} kcal`;
+          const label = e.name ? `${e.name} · ${amount}` : amount;
           return (
             <li key={e.id}>
               <div className="food-row">
