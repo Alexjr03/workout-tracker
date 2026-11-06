@@ -558,3 +558,21 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 - Lighthouse 12 mobile (Edge headless) on Today, History, Body, Food, Settings: Accessibility 100, Best Practices 100 on every screen; Performance 94–98 on a quiet run, CLS 0, LCP 2.1–2.4 s. Repeat runs swung to ~80 on any screen (TBT 30 ms → 600 ms, same bundle): 48 headless Edge processes left behind by Lighthouse were loading the machine, not app code.
 - Tap targets ≥ 44px on every screen; fixed the one miss ("Go to Today" link on an empty runner, was 24px tall).
 - Production JS 154.1 KB gzipped (limit 250 KB).
+
+---
+
+## Phase 10: More owner requests
+
+### - [ ] T32: Saved foods with custom calories
+**Description:** Save foods you eat often (name, kcal, optional protein) and log one with a single tap instead of looking up and typing the numbers each time. Food tab gets a "My foods" list above the manual entry; tapping a food adds it to the day. Foods are created, edited and deleted on the Food tab ("New food" form), and are included in the JSON backup.
+
+**Acceptance criteria:**
+- [ ] Create a food (name required, kcal > 0, protein optional); it appears in "My foods", sorted by most used.
+- [ ] One tap logs it to the shown day with its kcal (and protein when a target is set); Undo works as for other entries.
+- [ ] Editing a saved food doesn't change entries already logged; deleting asks first.
+- [ ] Dexie schema version adds a `foods` table (non-destructive); backup export/import includes it, with a backup schemaVersion bump and migration for older files.
+
+**Verification:** `npm run check:full`
+**Dependencies:** T22, T14
+**Files:** `src/db/schema.ts`, `src/db/types.ts`, `src/db/repos/food.ts`(+test), `src/features/food/FoodScreen.tsx`(+test), `src/features/settings/backup/{exportData,importData,schemas}.ts`
+**Scope:** M

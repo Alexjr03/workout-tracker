@@ -106,6 +106,9 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 
 **Checkpoint G:** owner tried each at the gym
 
+### Phase 10: More owner requests
+- [ ] T32: Saved foods with custom calories
+
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
