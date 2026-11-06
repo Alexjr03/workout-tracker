@@ -100,7 +100,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 - [x] T26: Last-time weights on every set
 - [x] T27: Push back a day
 - [x] T28: Swap suggestions by muscle group
-- [ ] T29: kg or lb per exercise
+- [x] T29: kg or lb per exercise
 - [ ] T30: How-to videos (embedded YouTube)
 - [ ] T31: Louder rest alarm
 

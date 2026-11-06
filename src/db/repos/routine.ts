@@ -1,4 +1,6 @@
+import { Dexie } from 'dexie';
 import type { Weekday } from '../../domain/dates';
+import { convertIncrement, convertWeight, type LiftUnit } from '../../domain/units';
 import type { WorkoutDb } from '../schema';
 import type { ExerciseDef, Routine } from '../types';
 
@@ -147,5 +149,62 @@ export function addTemplateExercise(db: WorkoutDb, templateId: string, exerciseI
       ...exercises,
       { id: def.id, name: def.name, type: def.type, sets: 3, repMin: 8, repMax: 12 },
     ];
+  });
+}
+
+/**
+ * Switches one exercise between lb and kg, converting what is stored for it: logged sets,
+ * suggestions, an in-progress draft, its starting load and its weight step.
+ */
+export async function setExerciseUnit(db: WorkoutDb, exerciseId: string, unit: LiftUnit) {
+  const tables = [db.exercises, db.sets, db.sessionExercises, db.activeSession, db.routine];
+  await db.transaction('rw', tables, async () => {
+    const def = await db.exercises.get(exerciseId);
+    if (!def) throw new RoutineError(`Unknown exercise ${exerciseId}.`);
+    const from = def.unit;
+    if (from === unit) return;
+    const weight = (w: number) => convertWeight(w, from, unit);
+
+    await db.exercises.update(exerciseId, {
+      unit,
+      increment: convertIncrement(def.increment, from, unit),
+    });
+    await db.sets
+      .where('[exerciseId+completedAt]')
+      .between([exerciseId, Dexie.minKey], [exerciseId, Dexie.maxKey])
+      .modify((s) => {
+        s.weight = weight(s.weight);
+      });
+    await db.sessionExercises
+      .where('exerciseId')
+      .equals(exerciseId)
+      .modify((s) => {
+        if (s.suggestedWeight !== null) s.suggestedWeight = weight(s.suggestedWeight);
+      });
+
+    const active = await db.activeSession.get('active');
+    if (active?.draftWeight != null) {
+      const slots = await db.sessionExercises
+        .where('sessionId')
+        .equals(active.sessionId)
+        .sortBy('order');
+      if (slots[active.exerciseIndex]?.exerciseId === exerciseId) {
+        await db.activeSession.update('active', { draftWeight: weight(active.draftWeight) });
+      }
+    }
+
+    const routine = await loadRoutine(db);
+    const load = routine.startingLoads[exerciseId];
+    if (load) {
+      await db.routine.update('routine', {
+        startingLoads: {
+          ...routine.startingLoads,
+          [exerciseId]: {
+            value: weight(load.value),
+            basis: load.basis.replace(new RegExp(`\\b${from}\\b`), unit),
+          },
+        },
+      });
+    }
   });
 }

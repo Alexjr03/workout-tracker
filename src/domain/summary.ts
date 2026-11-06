@@ -5,7 +5,7 @@ interface SummaryInput {
   startedAt: string;
   finishedAt: string;
   exercises: {
-    def: Pick<ExerciseDef, 'name' | 'loadBasis' | 'increment'>;
+    def: Pick<ExerciseDef, 'name' | 'loadBasis' | 'increment' | 'unit'>;
     prescribedSets: number;
     optionalSets: number;
     repMax: number;
@@ -19,7 +19,12 @@ export interface SessionSummary {
   setsPrescribed: number;
   minutes: number;
   /** Exercises whose next session will suggest a new weight. */
-  progressions: { name: string; next: number; loadBasis: ExerciseDef['loadBasis'] }[];
+  progressions: {
+    name: string;
+    next: number;
+    loadBasis: ExerciseDef['loadBasis'];
+    unit: ExerciseDef['unit'];
+  }[];
 }
 
 export function sessionSummary(input: SummaryInput): SessionSummary {
@@ -27,7 +32,8 @@ export function sessionSummary(input: SummaryInput): SessionSummary {
   let setsPrescribed = 0;
   for (const e of input.exercises) {
     const next = progressionSuggestion([{ ...e, finishedAt: input.finishedAt }], e.def);
-    if (next !== null) progressions.push({ name: e.def.name, next, loadBasis: e.def.loadBasis });
+    if (next !== null)
+      progressions.push({ name: e.def.name, next, loadBasis: e.def.loadBasis, unit: e.def.unit });
 
     const required = e.prescribedSets - e.optionalSets;
     const optionalDone = Math.min(e.prescribedSets, e.sets.length) - required;

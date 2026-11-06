@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { sessionSummary } from './summary';
 
-const bench = { name: 'Bench press', loadBasis: 'per-side' as const, increment: 2.5 };
-const row = { name: 'Machine row', loadBasis: 'total' as const, increment: 5 };
+const bench = {
+  name: 'Bench press',
+  loadBasis: 'per-side' as const,
+  increment: 2.5,
+  unit: 'lb' as const,
+};
+const row = { name: 'Machine row', loadBasis: 'total' as const, increment: 5, unit: 'lb' as const };
 
 const sets = (pairs: [number, number][]) =>
   pairs.map(([weight, reps], setIndex) => ({ setIndex, weight, reps }));
@@ -40,7 +45,7 @@ describe('sessionSummary', () => {
       setsDone: 5,
       setsPrescribed: 6,
       minutes: 48,
-      progressions: [{ name: 'Bench press', next: 12.5, loadBasis: 'per-side' }],
+      progressions: [{ name: 'Bench press', next: 12.5, loadBasis: 'per-side', unit: 'lb' }],
     });
   });
 
@@ -75,7 +80,7 @@ describe('sessionSummary', () => {
     expect(summary).toMatchObject({
       setsDone: 5,
       setsPrescribed: 5,
-      progressions: [{ name: 'Bench press', next: 12.5, loadBasis: 'per-side' }],
+      progressions: [{ name: 'Bench press', next: 12.5, loadBasis: 'per-side', unit: 'lb' }],
     });
   });
 

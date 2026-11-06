@@ -42,7 +42,7 @@ export function ExerciseProgress() {
     );
   }
 
-  const unit = loadBasisLabel(def.loadBasis);
+  const unit = loadBasisLabel(def.loadBasis, def.unit);
   const points = exerciseSeries(sessions, def.loadBasis);
   const weightAxis = def.loadBasis === 'assistance' ? `${unit} (lower is better)` : unit;
   const isWeight = measure === 'weight';

@@ -288,7 +288,7 @@ describe('SessionRunner: swap', () => {
     expect(
       await screen.findByRole('heading', { name: 'Incline dumbbell press' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('lb each')).toBeInTheDocument();
+    expect(screen.getByText('kg each')).toBeInTheDocument(); // gym dumbbells are kg
 
     await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     await userEvent.click(screen.getByRole('button', { name: 'Back to Bench press' }));

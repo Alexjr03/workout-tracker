@@ -54,7 +54,9 @@ describe('ensureSeeded', () => {
       increment: 2.5,
       isCustom: false,
       muscle: 'chest',
+      unit: 'lb',
     });
+    expect(await db.exercises.get('db-curl')).toMatchObject({ unit: 'kg', increment: 2 });
     expect(await db.exercises.get('assisted-pull-up')).toMatchObject({ loadBasis: 'assistance' });
   });
 

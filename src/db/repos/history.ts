@@ -97,7 +97,7 @@ export async function sessionDetail(db: WorkoutDb, id: string): Promise<SessionD
         repMin: slot.repMin,
         repMax: slot.repMax,
         rirTarget: slot.rirTarget,
-        unit: def ? loadBasisLabel(def.loadBasis) : 'lb',
+        unit: def ? loadBasisLabel(def.loadBasis, def.unit) : 'lb',
         sets: sets
           .filter((s) => s.sessionExerciseId === slot.id)
           .map((s) => ({ weight: s.weight, reps: s.reps })),

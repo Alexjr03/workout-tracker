@@ -7,6 +7,7 @@ import {
   moveTemplateExercise,
   removeTemplateExercise,
   RoutineError,
+  setExerciseUnit,
   setScheduleDay,
   updateExercise,
   updateTemplateExercise,
@@ -198,6 +199,54 @@ describe('session template edits', () => {
     );
     await expect(updateTemplateExercise(db, 'nope', 0, { sets: 2 })).rejects.toThrow(
       new RoutineError('Unknown session nope.'),
+    );
+  });
+});
+
+describe('setExerciseUnit', () => {
+  it("converts that exercise's logged sets, suggestions, draft and step", async () => {
+    const id = await startSession(db, 'upper-b', new Date(2026, 10, 25, 18));
+    const curl = (await db.sessionExercises.where('sessionId').equals(id).toArray()).find(
+      (s) => s.exerciseId === 'db-curl',
+    );
+    const incline = (await db.sessionExercises.where('sessionId').equals(id).sortBy('order'))[0];
+    if (!curl || !incline) throw new Error('fixture');
+    await completeSet(db, { slot: curl, weight: 12, reps: 10 });
+    await completeSet(db, { slot: incline, weight: 20, reps: 8 });
+    await db.sessionExercises.update(curl.id, { suggestedWeight: 14 });
+    await db.activeSession.update('active', { exerciseIndex: curl.order, draftWeight: 12 });
+
+    await setExerciseUnit(db, 'db-curl', 'lb');
+
+    expect(await db.exercises.get('db-curl')).toMatchObject({ unit: 'lb', increment: 5 });
+    const sets = await db.sets.where('sessionId').equals(id).toArray();
+    expect(sets.find((s) => s.exerciseId === 'db-curl')?.weight).toBe(26.5);
+    expect(sets.find((s) => s.exerciseId === 'incline-db-press')?.weight).toBe(20);
+    expect((await db.sessionExercises.get(curl.id))?.suggestedWeight).toBe(31);
+    expect((await db.activeSession.get('active'))?.draftWeight).toBe(26.5);
+  });
+
+  it('converts the starting load and its label', async () => {
+    await setExerciseUnit(db, 'bench-press', 'kg');
+    expect((await routine()).startingLoads['bench-press']).toEqual({
+      value: 4.5,
+      basis: 'kg per side',
+    });
+    expect((await db.exercises.get('bench-press'))?.increment).toBe(1.25);
+  });
+
+  it('leaves a draft for another exercise alone, and does nothing for the same unit', async () => {
+    await startSession(db, 'upper-b', new Date(2026, 10, 25, 18));
+    await db.activeSession.update('active', { exerciseIndex: 0, draftWeight: 20 });
+    await setExerciseUnit(db, 'db-curl', 'lb');
+    expect((await db.activeSession.get('active'))?.draftWeight).toBe(20);
+    await setExerciseUnit(db, 'db-curl', 'lb');
+    expect((await db.exercises.get('db-curl'))?.increment).toBe(5);
+  });
+
+  it('rejects an unknown exercise', async () => {
+    await expect(setExerciseUnit(db, 'nope', 'kg')).rejects.toThrow(
+      new RoutineError('Unknown exercise nope.'),
     );
   });
 });

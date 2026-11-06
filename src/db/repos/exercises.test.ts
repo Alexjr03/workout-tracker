@@ -66,6 +66,7 @@ describe('swapExercise', () => {
       increment: 5,
       isCustom: true,
       muscle: 'quads', // taken from the exercise it replaces
+      unit: 'lb', // likewise
     });
     const slot = await slotById(legPress.id);
     expect(slot).toMatchObject({
@@ -128,6 +129,7 @@ describe('swapExercise', () => {
       increment: 5,
       isCustom: true,
       muscle: 'quads',
+      unit: 'lb',
     });
     await swapExercise(db, legPress.id, { newName: 'Hack squat' });
     expect((await slotById(legPress.id)).exerciseId).toBe('hack-squat-2');

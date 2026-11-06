@@ -64,7 +64,7 @@ function LiftingSummary({ summary }: { summary: SessionSummary }) {
         ) : (
           summary.progressions.map((p) => (
             <p key={p.name}>
-              {p.name}: {p.next} {loadBasisLabel(p.loadBasis)} next time
+              {p.name}: {p.next} {loadBasisLabel(p.loadBasis, p.unit)} next time
             </p>
           ))
         )}

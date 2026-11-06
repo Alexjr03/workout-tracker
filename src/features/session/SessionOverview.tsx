@@ -21,7 +21,7 @@ function EditSet({ item, set, onDone }: { item: RunnerSlot; set: SetLog; onDone:
     <div role="group" aria-label={label} className="card stack">
       <Stepper
         label="Weight"
-        unit={loadBasisLabel(item.def.loadBasis)}
+        unit={loadBasisLabel(item.def.loadBasis, item.def.unit)}
         step={item.def.increment}
         value={weight}
         onChange={setWeight}

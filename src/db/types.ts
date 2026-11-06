@@ -1,6 +1,7 @@
 // Stored record shapes (SPEC › Data Model). Logs snapshot the prescription they were
 // logged against, so routine edits never rewrite history.
 import type { LocalDate } from '../domain/dates';
+import type { LiftUnit } from '../domain/units';
 import type {
   ExerciseType,
   LoadBasis,
@@ -44,6 +45,8 @@ export interface ExerciseDef {
   isCustom: boolean;
   /** Main muscle group; null for custom exercises without one. */
   muscle: Muscle | null;
+  /** Unit this exercise is weighed in. */
+  unit: LiftUnit;
 }
 
 export type RirTarget = '~3' | '1-2';

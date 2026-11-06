@@ -57,6 +57,22 @@ describe('parseBackup', () => {
     ).toBe(true);
   });
 
+  it('upgrades a version 3 backup made before per-exercise units, keeping numbers', async () => {
+    await logSomething();
+    const raw = JSON.parse(JSON.stringify(await buildBackup(db, NOW)));
+    raw.schemaVersion = 3;
+    for (const e of raw.data.exercises) {
+      delete e.unit;
+      if (e.loadBasis === 'per-dumbbell') e.increment = 5;
+    }
+    const before = raw.data.sets.map((s: { weight: number }) => s.weight);
+    const { backup } = parseBackup(JSON.stringify(raw));
+    const ex = (id: string) => backup.data.exercises.find((e) => e.id === id);
+    expect(ex('db-curl')).toMatchObject({ unit: 'kg', increment: 2 });
+    expect(ex('bench-press')).toMatchObject({ unit: 'lb', increment: 2.5 });
+    expect(backup.data.sets.map((s) => s.weight)).toEqual(before);
+  });
+
   it('upgrades a version 2 backup made before muscle groups', async () => {
     const raw = JSON.parse(JSON.stringify(await buildBackup(db, NOW)));
     raw.schemaVersion = 2;

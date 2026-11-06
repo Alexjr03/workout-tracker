@@ -62,3 +62,52 @@ describe('schema v3', () => {
     await db.delete();
   });
 });
+
+describe('schema v4', () => {
+  it('relabels dumbbell exercises as kg without touching logged numbers', async () => {
+    const name = 'migration-v4-test';
+    const v3 = new Dexie(name);
+    v3.version(3).stores({ exercises: 'id, isCustom', sets: 'id, sessionId' });
+    await v3.table('exercises').bulkAdd([
+      {
+        id: 'db-curl',
+        name: 'Dumbbell curl',
+        type: 'isolation',
+        loadBasis: 'per-dumbbell',
+        increment: 5,
+        isCustom: false,
+        muscle: 'biceps',
+      },
+      {
+        id: 'bench-press',
+        name: 'Bench press',
+        type: 'compound',
+        loadBasis: 'per-side',
+        increment: 2.5,
+        isCustom: false,
+        muscle: 'chest',
+      },
+      {
+        id: 'my-db-row',
+        name: 'DB row',
+        type: 'compound',
+        loadBasis: 'per-dumbbell',
+        increment: 4,
+        isCustom: true,
+        muscle: 'back',
+      },
+    ]);
+    await v3
+      .table('sets')
+      .add({ id: 's1', sessionId: 'x', exerciseId: 'db-curl', weight: 12, reps: 10 });
+    v3.close();
+
+    const db = createDb(name);
+    expect(await db.exercises.get('db-curl')).toMatchObject({ unit: 'kg', increment: 2 });
+    expect(await db.exercises.get('bench-press')).toMatchObject({ unit: 'lb', increment: 2.5 });
+    // A step the owner set themselves is kept.
+    expect(await db.exercises.get('my-db-row')).toMatchObject({ unit: 'kg', increment: 4 });
+    expect((await db.sets.get('s1'))?.weight).toBe(12);
+    await db.delete();
+  });
+});

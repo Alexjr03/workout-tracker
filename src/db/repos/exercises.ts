@@ -42,6 +42,7 @@ export async function swapExercise(db: WorkoutDb, slotId: string, target: SwapTa
         increment: 5,
         isCustom: true,
         muscle: target.muscle === undefined ? (originalDef?.muscle ?? null) : target.muscle,
+        unit: originalDef?.unit ?? 'lb',
       };
       await db.exercises.add(def);
     } else {

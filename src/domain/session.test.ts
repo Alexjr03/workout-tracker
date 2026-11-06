@@ -36,10 +36,17 @@ describe('nextExerciseIndex', () => {
 
 describe('loadBasisLabel', () => {
   it('names the unit for each load basis', () => {
-    expect(loadBasisLabel('per-side')).toBe('lb/side');
-    expect(loadBasisLabel('per-dumbbell')).toBe('lb each');
-    expect(loadBasisLabel('total')).toBe('lb');
-    expect(loadBasisLabel('assistance')).toBe('lb assist');
+    expect(loadBasisLabel('per-side', 'lb')).toBe('lb/side');
+    expect(loadBasisLabel('per-dumbbell', 'lb')).toBe('lb each');
+    expect(loadBasisLabel('total', 'lb')).toBe('lb');
+    expect(loadBasisLabel('assistance', 'lb')).toBe('lb assist');
+  });
+
+  it('uses kg for kg exercises', () => {
+    expect(loadBasisLabel('per-side', 'kg')).toBe('kg/side');
+    expect(loadBasisLabel('per-dumbbell', 'kg')).toBe('kg each');
+    expect(loadBasisLabel('total', 'kg')).toBe('kg');
+    expect(loadBasisLabel('assistance', 'kg')).toBe('kg assist');
   });
 });
 

@@ -43,6 +43,16 @@ const MIGRATIONS: Record<number, (raw: Raw) => void> = {
       e.muscle ??= exerciseDefaults[String(e.id)]?.muscle ?? null;
     }
   },
+  // v3 → v4: unit per exercise, as in the database migration (numbers kept as typed).
+  3: (raw) => {
+    const exercises = raw.data?.exercises;
+    if (!Array.isArray(exercises)) return;
+    for (const e of exercises as Record<string, unknown>[]) {
+      if (e.unit) continue;
+      e.unit = e.loadBasis === 'per-dumbbell' ? 'kg' : 'lb';
+      if (e.unit === 'kg' && e.increment === 5) e.increment = 2;
+    }
+  },
 };
 
 /** Reads and validates a backup file's text, upgrading older versions. Throws BackupError. */

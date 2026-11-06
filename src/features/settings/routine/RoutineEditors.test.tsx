@@ -107,6 +107,30 @@ describe('CatalogEditor', () => {
     );
   });
 
+  it('switches an exercise between kg and lb after confirming', async () => {
+    inRouter(<CatalogEditor />);
+    await userEvent.click(await screen.findByRole('button', { name: /^Dumbbell curl/ }));
+    const form = screen.getByRole('group', { name: 'Edit Dumbbell curl' });
+    expect(within(form).getByText('Weighed in kg')).toBeInTheDocument();
+    await userEvent.click(within(form).getByRole('button', { name: 'Switch to lb' }));
+    const confirm = within(form).getByRole('alertdialog');
+    expect(confirm).toHaveTextContent('logged weights, suggestion and step are converted from kg');
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Convert to lb' }));
+    await vi.waitFor(async () =>
+      expect(await db.exercises.get('db-curl')).toMatchObject({ unit: 'lb', increment: 5 }),
+    );
+  });
+
+  it('keeps the unit when the switch is cancelled', async () => {
+    inRouter(<CatalogEditor />);
+    await userEvent.click(await screen.findByRole('button', { name: /^Bench press/ }));
+    const form = screen.getByRole('group', { name: 'Edit Bench press' });
+    await userEvent.click(within(form).getByRole('button', { name: 'Switch to kg' }));
+    await userEvent.click(within(form).getByRole('button', { name: 'Keep lb' }));
+    expect(within(form).queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect((await db.exercises.get('bench-press'))?.unit).toBe('lb');
+  });
+
   it('shows an error and keeps the form open for an empty name', async () => {
     inRouter(<CatalogEditor />);
     await userEvent.click(await screen.findByRole('button', { name: /^Bench press/ }));

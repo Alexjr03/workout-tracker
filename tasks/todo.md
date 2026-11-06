@@ -511,7 +511,7 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Files:** `src/seed/exerciseDefaults.json`, `src/db/schema.ts`, `src/db/repos/exercises.ts`(+test), `src/features/session/SwapSheet.tsx`, `src/features/settings/routine/CatalogEditor.tsx`
 **Scope:** M
 
-### - [ ] T29: kg or lb per exercise
+### - [x] T29: kg or lb per exercise
 **Description:** Each exercise has its own lift unit (gym dumbbells are kg, plates lb). Dumbbell exercises default to kg, everything else to lb; editable in Settings → Exercises. Labels everywhere use the exercise's unit. Past logged numbers are kept as typed (owner unsure what was entered) and only relabelled; changing an exercise's unit later converts its history and increment. The stashed global-switch WIP (`units.ts` conversion) can be reused.
 
 **Acceptance criteria:**

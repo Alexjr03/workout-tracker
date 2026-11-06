@@ -63,6 +63,18 @@ export function createDb(name = 'workout-tracker'): WorkoutDb {
         e.muscle ??= exerciseDefaults[e.id as keyof typeof exerciseDefaults]?.muscle ?? null;
       }),
   );
+  // v4: unit per exercise. Dumbbells (kg at the owner's gym) become kg; logged numbers are
+  // kept as typed. A dumbbell step still at the old 5 lb default becomes 2 kg.
+  db.version(4).upgrade((tx) =>
+    tx
+      .table('exercises')
+      .toCollection()
+      .modify((e: Partial<ExerciseDef>) => {
+        if (e.unit) return;
+        e.unit = e.loadBasis === 'per-dumbbell' ? 'kg' : 'lb';
+        if (e.unit === 'kg' && e.increment === 5) e.increment = 2;
+      }),
+  );
   return db;
 }
 

@@ -52,7 +52,7 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
   );
   const [saving, setSaving] = useState(false);
   const [swapping, setSwapping] = useState(false);
-  const unit = loadBasisLabel(def.loadBasis);
+  const unit = loadBasisLabel(def.loadBasis, def.unit);
   // Ramp-up: the last set may be skipped.
   const optional = setIndex >= requiredSets(slot);
   const canComplete = weight !== null && reps !== null && reps >= 1 && !saving;

@@ -19,7 +19,7 @@ The routine itself (schedule, sessions, exercises, sets, rep ranges, rest times,
 2. **Dates are local calendar days** (`YYYY-MM-DD` in the phone's time zone). "Today" uses the device clock.
 3. **Weight is logged in the exercise's load basis.** Bench is logged as lb **per side** (seed: 10 lb/side), dumbbells as lb **per dumbbell**, and machines/cables as the **stack or total** number. The app never converts between bases and never adds bar weight.
 4. **Only one session can be active at a time.** Starting another prompts you to finish or discard the active one.
-5. **Units are fixed in v1:** lifts in lb, body weight in kg. No unit conversion.
+5. **Units:** body weight is always kg. Lifts are weighed per exercise in lb or kg *(changed 2026-11-06 at the owner's request: gym dumbbells are kg, plates lb)*. Dumbbell exercises default to kg, the rest to lb; switching an exercise in Settings → Exercises converts its logged weights. Existing numbers were relabelled, not converted, when this was introduced.
 6. **Rest timer alerts only fire while the app is open** (an iOS PWA limitation). The timer is based on timestamps, so it shows the correct remaining time after you switch apps and come back.
 7. **Hosting:** the app must be served over HTTPS once so the iPhone can install it. GitHub Pages is assumed (see Open Questions).
 8. **"Every prescribed set"** means the required sets shown in that session; an optional ramp-up set that was skipped doesn't count against progression.

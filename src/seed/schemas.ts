@@ -5,6 +5,8 @@ const positiveInt = z.number().int().positive();
 
 export const exerciseTypeSchema = z.enum(['compound', 'isolation']);
 export const loadBasisSchema = z.enum(['per-side', 'per-dumbbell', 'total', 'assistance']);
+/** Unit a lift is weighed in: gym dumbbells are kg, plates and stacks lb. */
+export const liftUnitSchema = z.enum(['lb', 'kg']);
 /** Main muscle group, used to suggest swaps that train the same thing. */
 export const muscleSchema = z.enum([
   'chest',
@@ -110,7 +112,12 @@ export const routineSeedSchema = z
 
 export const exerciseDefaultsSchema = z.record(
   z.string(),
-  z.strictObject({ loadBasis: loadBasisSchema, increment: positive, muscle: muscleSchema }),
+  z.strictObject({
+    loadBasis: loadBasisSchema,
+    increment: positive,
+    muscle: muscleSchema,
+    unit: liftUnitSchema,
+  }),
 );
 
 export type RoutineSeed = z.infer<typeof routineSeedSchema>;

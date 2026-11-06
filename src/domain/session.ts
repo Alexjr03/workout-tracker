@@ -1,4 +1,5 @@
 import type { LoadBasis } from '../db/types';
+import type { LiftUnit } from './units';
 
 /**
  * Exercise to show after a set: the current one while it has sets left, else the next one
@@ -31,13 +32,16 @@ export function targetSets(slot: SetCounts): number {
   return slot.optionalSkipped ? requiredSets(slot) : slot.prescribedSets;
 }
 
-const BASIS_LABELS: Record<LoadBasis, string> = {
-  'per-side': 'lb/side',
-  'per-dumbbell': 'lb each',
-  total: 'lb',
-  assistance: 'lb assist',
-};
-
-export function loadBasisLabel(basis: LoadBasis): string {
-  return BASIS_LABELS[basis];
+/** How a weight reads next to its number: '12.5 lb/side', '20 kg each', '40 lb assist'. */
+export function loadBasisLabel(basis: LoadBasis, unit: LiftUnit): string {
+  switch (basis) {
+    case 'per-side':
+      return `${unit}/side`;
+    case 'per-dumbbell':
+      return `${unit} each`;
+    case 'total':
+      return unit;
+    case 'assistance':
+      return `${unit} assist`;
+  }
 }

@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useId, useState } from 'react';
 import { Link } from 'react-router';
-import { RoutineError, updateExercise } from '../../../db/repos/routine';
+import { RoutineError, setExerciseUnit, updateExercise } from '../../../db/repos/routine';
 import { db } from '../../../db/schema';
 import type { ExerciseDef, ExerciseType, LoadBasis, Muscle } from '../../../db/types';
 import { loadBasisLabel } from '../../../domain/session';
@@ -22,6 +22,8 @@ function ExerciseForm({ exercise, onDone }: { exercise: ExerciseDef; onDone: () 
   const [loadBasis, setLoadBasis] = useState<LoadBasis>(exercise.loadBasis);
   const [increment, setIncrement] = useState<number | null>(exercise.increment);
   const [muscle, setMuscle] = useState<Muscle | null>(exercise.muscle);
+  const [confirmUnit, setConfirmUnit] = useState(false);
+  const otherUnit = exercise.unit === 'kg' ? 'lb' : 'kg';
   const [error, setError] = useState<string | null>(null);
   const ids = { name: useId(), type: useId(), basis: useId(), muscle: useId() };
 
@@ -92,9 +94,34 @@ function ExerciseForm({ exercise, onDone }: { exercise: ExerciseDef; onDone: () 
           ))}
         </select>
       </div>
+      <div className="stack">
+        <p>Weighed in {exercise.unit}</p>
+        {confirmUnit ? (
+          <div role="alertdialog" aria-label={`Switch to ${otherUnit}?`} className="stack">
+            <p>
+              Switch {exercise.name} to {otherUnit}? Its logged weights, suggestion and step are
+              converted from {exercise.unit}.
+            </p>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => void setExerciseUnit(db, exercise.id, otherUnit).then(onDone)}
+            >
+              Convert to {otherUnit}
+            </button>
+            <button type="button" onClick={() => setConfirmUnit(false)}>
+              Keep {exercise.unit}
+            </button>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setConfirmUnit(true)}>
+            Switch to {otherUnit}
+          </button>
+        )}
+      </div>
       <Stepper
         label="Increment"
-        unit={loadBasisLabel(loadBasis)}
+        unit={loadBasisLabel(loadBasis, exercise.unit)}
         step={2.5}
         value={increment}
         onChange={setIncrement}
@@ -131,7 +158,7 @@ export function CatalogEditor() {
               {e.name}
               <span className="muted">
                 {e.type === 'compound' ? 'Compound' : 'Isolation'} · {e.increment}{' '}
-                {loadBasisLabel(e.loadBasis)}
+                {loadBasisLabel(e.loadBasis, e.unit)}
               </span>
             </button>
             {editing === e.id && <ExerciseForm exercise={e} onDone={() => setEditing(null)} />}
