@@ -163,7 +163,9 @@ export function SessionRunner() {
     return (
       <div className="stack">
         <p>No session in progress.</p>
-        <Link to="/">Go to Today</Link>
+        <Link to="/" className="button-like">
+          Go to Today
+        </Link>
       </div>
     );
   }

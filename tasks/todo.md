@@ -424,7 +424,7 @@ Save writes `CardioLog` and finishes the session.
 
 ## Phase 8: Release
 
-### - [ ] T23: Accessibility, performance and bundle audit
+### - [x] T23: Accessibility, performance and bundle audit
 **Description:** Run Lighthouse (mobile) against `npm run preview`. Check tap targets and contrast, and fix the findings.
 
 **Acceptance criteria:**
@@ -553,3 +553,8 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 ### Checkpoint G: Feedback round
 - [ ] T25–T31 done or explicitly dropped
 - [ ] Owner tried each at the gym
+
+#### T23 audit results (2026-11-06)
+- Lighthouse 12 mobile (Edge headless) on Today, History, Body, Food, Settings: Accessibility 100, Best Practices 100 on every screen; Performance 94–98 on a quiet run, CLS 0, LCP 2.1–2.4 s. Repeat runs swung to ~80 on any screen (TBT 30 ms → 600 ms, same bundle): 48 headless Edge processes left behind by Lighthouse were loading the machine, not app code.
+- Tap targets ≥ 44px on every screen; fixed the one miss ("Go to Today" link on an empty runner, was 24px tall).
+- Production JS 154.1 KB gzipped (limit 250 KB).

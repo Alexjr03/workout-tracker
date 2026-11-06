@@ -90,7 +90,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 **Checkpoint E:** all modules done · `npm run check` + `npm run test:e2e` green · human review
 
 ### Phase 8: Release
-- [ ] T23: Accessibility, performance and bundle audit
+- [x] T23: Accessibility, performance and bundle audit
 - [ ] T24: Production deploy and iPhone acceptance run (Success Criteria 1–14)
 
 **Checkpoint F:** every SPEC success criterion checked off
