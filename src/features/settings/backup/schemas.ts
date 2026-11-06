@@ -26,6 +26,7 @@ const settings = z.object({
   programStartDate: localDate,
   lastExportAt: z.string().nullable(),
   pushBacks: z.array(localDate).optional(),
+  lockedAlarm: z.boolean().optional(),
 });
 
 const routine = z.object({

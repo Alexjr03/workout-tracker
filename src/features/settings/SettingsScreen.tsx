@@ -142,6 +142,14 @@ export function SettingsScreen() {
           value={rest.isolation}
           onChange={saveNumber((isolation) => ({ restSeconds: { ...rest, isolation } }))}
         />
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={settings.lockedAlarm ?? false}
+            onChange={(e) => void save({ lockedAlarm: e.target.checked })}
+          />
+          Alarm with phone locked (experimental)
+        </label>
       </section>
 
       <section className="card stack" aria-label="Targets">

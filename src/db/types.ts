@@ -27,6 +27,8 @@ export interface Settings {
   lastExportAt: string | null;
   /** Days this week that were pushed back ("can't train today"); only the current week counts. */
   pushBacks?: LocalDate[];
+  /** Experimental: play the rest alarm as a media clip so it can sound with the phone locked. */
+  lockedAlarm?: boolean;
 }
 
 export interface Routine {

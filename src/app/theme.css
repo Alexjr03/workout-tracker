@@ -784,3 +784,16 @@ button[aria-pressed='true'] {
 .runner-set-row .runner-set {
   margin: 0;
 }
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap-primary);
+}
+
+.checkbox-row input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--accent);
+}

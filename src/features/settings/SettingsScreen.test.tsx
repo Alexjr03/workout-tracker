@@ -124,6 +124,16 @@ describe('SettingsScreen fields', () => {
     );
   });
 
+  it('turns the locked-phone alarm on and off', async () => {
+    render(<SettingsScreen />, { wrapper: MemoryRouter });
+    const box = await screen.findByRole('checkbox', { name: /phone locked/ });
+    expect(box).not.toBeChecked();
+    await userEvent.click(box);
+    await vi.waitFor(async () => expect((await stored())?.lockedAlarm).toBe(true));
+    await userEvent.click(box);
+    await vi.waitFor(async () => expect((await stored())?.lockedAlarm).toBe(false));
+  });
+
   it('sets and clears the protein target', async () => {
     render(<SettingsScreen />, { wrapper: MemoryRouter });
     await userEvent.type(await screen.findByRole('textbox', { name: 'Protein target' }), '140');

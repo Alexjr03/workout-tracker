@@ -246,6 +246,28 @@ describe('SessionRunner: rest timer', () => {
     expect(await screen.findByRole('timer')).toHaveTextContent(/^1:(15|14)$/);
   });
 
+  it('plays the locked-phone alarm clip only when turned on, and stops it on Skip', async () => {
+    const created = vi.spyOn(URL, 'createObjectURL');
+    const revoked = vi.spyOn(URL, 'revokeObjectURL');
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await screen.findByText('Set 1 of 3');
+    await userEvent.click(completeButton());
+    await screen.findByRole('timer');
+    await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+    expect(revoked).not.toHaveBeenCalled();
+
+    await db.settings.update('settings', { lockedAlarm: true });
+    created.mockClear();
+    await userEvent.click(completeButton());
+    await screen.findByRole('timer');
+    await vi.waitFor(() => expect(created).toHaveBeenCalled());
+    await userEvent.click(screen.getByRole('button', { name: 'Skip' }));
+    await vi.waitFor(() => expect(revoked).toHaveBeenCalled());
+    created.mockRestore();
+    revoked.mockRestore();
+  });
+
   it('saves a ±15 s adjustment', async () => {
     await startSession(db, 'upper-a', MON);
     renderRunner();

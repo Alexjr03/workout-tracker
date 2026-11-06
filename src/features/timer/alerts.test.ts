@@ -1,48 +1,83 @@
 import { renderHook } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { beep, primeAudio, useWakeLock } from './alerts';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useWakeLock } from './alerts';
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('beep / primeAudio', () => {
-  it('does nothing when Web Audio is unavailable', () => {
-    vi.stubGlobal('AudioContext', undefined);
+/** A fake <audio> element that records what it was asked to play. */
+class FakeAudio {
+  static last: FakeAudio | null = null;
+  src = '';
+  muted = false;
+  currentTime = 0;
+  played: { src: string; muted: boolean }[] = [];
+  pause = vi.fn();
+  constructor() {
+    FakeAudio.last = this;
+  }
+  play() {
+    this.played.push({ src: this.src, muted: this.muted });
+    return Promise.resolve();
+  }
+}
+
+describe('alarm sound', () => {
+  let alerts: typeof import('./alerts');
+  let urls: number;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    FakeAudio.last = null;
+    urls = 0;
+    vi.stubGlobal('Audio', FakeAudio);
+    vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:${++urls}`);
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    alerts = await import('./alerts');
+  });
+
+  it('does nothing when audio is unavailable or was never primed', () => {
+    vi.stubGlobal('Audio', undefined);
     expect(() => {
-      primeAudio();
-      beep();
+      alerts.primeAudio();
+      alerts.beep();
+      alerts.scheduleLockedAlarm(new Date(Date.now() + 60_000).toISOString());
+      alerts.cancelLockedAlarm();
     }).not.toThrow();
   });
 
-  it('plays a tone through a context unlocked by a tap', () => {
-    const start = vi.fn();
-    const osc = {
-      frequency: { value: 0 },
-      connect: vi.fn(),
-      start,
-      stop: vi.fn(),
-    };
-    const gain = {
-      gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
-      connect: vi.fn(),
-    };
-    const resume = vi.fn(() => Promise.resolve());
-    class FakeAudioContext {
-      currentTime = 0;
-      destination = {};
-      resume = resume;
-      createOscillator = () => osc;
-      createGain = () => gain;
-    }
-    vi.stubGlobal('AudioContext', FakeAudioContext);
+  it('unlocks the player inside the tap with a muted play, then beeps out loud', async () => {
+    const session = { type: 'auto' };
+    vi.stubGlobal('navigator', { audioSession: session });
+    alerts.primeAudio();
+    const player = FakeAudio.last;
+    expect(player?.played).toEqual([{ src: 'blob:1', muted: true }]);
+    await vi.waitFor(() => expect(player?.muted).toBe(false));
+    expect(player?.pause).toHaveBeenCalled();
 
-    primeAudio();
-    primeAudio();
-    expect(resume).toHaveBeenCalledTimes(2);
-    beep();
-    expect(osc.frequency.value).toBe(880);
-    expect(start).toHaveBeenCalledOnce();
+    alerts.beep();
+    expect(player?.played.at(-1)).toEqual({ src: 'blob:1', muted: false });
+    // Lowers other audio (music) while the alarm plays.
+    expect(session.type).toBe('transient');
+  });
+
+  it('plays a locked-phone alarm clip that ends when the rest does, and cancels it', () => {
+    alerts.primeAudio();
+    const player = FakeAudio.last;
+    alerts.scheduleLockedAlarm(new Date(Date.now() + 90_000).toISOString());
+    expect(player?.played.at(-1)?.src).toBe('blob:2');
+    expect(player?.played.at(-1)?.muted).toBe(false);
+
+    // While that clip is playing, the in-app beep doesn't play a second alarm.
+    const count = player?.played.length;
+    alerts.beep();
+    expect(player?.played.length).toBe(count);
+
+    alerts.cancelLockedAlarm();
+    expect(player?.pause).toHaveBeenCalled();
+    alerts.beep();
+    expect(player?.played.at(-1)?.src).toBe('blob:1');
   });
 });
 

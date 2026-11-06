@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { saveDraft } from '../../db/repos/activeSession';
 import { finishSession } from '../../db/repos/sessions';
@@ -14,7 +15,12 @@ import { defaultReps, defaultWeight } from '../../domain/defaults';
 import { rirText } from '../../domain/rampUp';
 import { loadBasisLabel, requiredSets, targetSets } from '../../domain/session';
 import { Stepper } from '../../ui/Stepper';
-import { primeAudio, useWakeLock } from '../timer/alerts';
+import {
+  cancelLockedAlarm,
+  primeAudio,
+  scheduleLockedAlarm,
+  useWakeLock,
+} from '../timer/alerts';
 import { RestTimerBar } from '../timer/RestTimerBar';
 import { CardioForm } from './CardioForm';
 import { SessionOverview } from './SessionOverview';
@@ -181,6 +187,14 @@ export function SessionRunner() {
   const [showOverview, setShowOverview] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
   useWakeLock(Boolean(data));
+  const lockedAlarm = useLiveQuery(() => db.settings.get('settings'))?.lockedAlarm ?? false;
+  const restEndsAt = data?.restEndsAt ?? null;
+  // Follows the rest in the DB, so Complete set, ±15 s and Skip all (re)schedule or cancel it.
+  useEffect(() => {
+    if (!lockedAlarm || !restEndsAt || Date.parse(restEndsAt) <= Date.now()) return;
+    scheduleLockedAlarm(restEndsAt);
+    return cancelLockedAlarm;
+  }, [lockedAlarm, restEndsAt]);
 
   if (data === undefined) return null;
   if (data === null) {

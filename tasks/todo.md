@@ -537,13 +537,15 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Files:** `src/seed/exerciseDefaults.json`, `src/features/session/VideoSheet.tsx`(+test), `src/features/settings/routine/CatalogEditor.tsx`
 **Scope:** M (video search is its own sub-step)
 
-### - [ ] T31: Louder rest alarm
+### - [x] T31: Louder rest alarm
 **Description:** Play the end-of-rest alarm loudly over music: Audio Session API set so it ducks other audio and ignores the silent switch where iOS supports it, with a longer, louder tone. Then an experiment for a locked phone (background audio workaround), shipped behind a Settings toggle and tested at the gym. A locked-phone alarm can't be promised: iOS freezes web apps when locked, and push notifications would need a server.
 
 **Acceptance criteria:**
 - [ ] Alarm plays with the ringer switch on silent and over music (owner confirms at the gym).
 - [ ] Locked-phone experiment result recorded here; kept only if it works.
-- [ ] Existing timer tests still pass.
+- [x] Existing timer tests still pass.
+
+**Notes (2026-11-06):** The alarm is now a generated WAV (beep, beep, higher beep at full volume) played through one `<audio>` element, which iOS treats as media rather than a UI sound; `navigator.audioSession.type = 'transient'` lowers music while it plays (Safari 17+). The Complete set tap unlocks the player with a muted play. Settings › Rest times › "Alarm with phone locked (experimental)" plays a clip that is silent until the rest ends, then sounds the alarm; it follows ±15 s and Skip. Both still need the owner's check at the gym.
 
 **Verification:** `npm run check` · manual at the gym
 **Dependencies:** T10

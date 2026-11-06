@@ -246,7 +246,8 @@ Pure domain functions with full unit test coverage:
 - Starts automatically when a set is completed. Duration is `restSeconds[exercise.type]` (150 s compound / 75 s isolation).
 - Stores `endsAt` as an absolute timestamp, and shows remaining time from `endsAt − now`. It survives app switches, screen lock and reloads; an active timer is restored from storage.
 - Controls: **−15 s**, **+15 s**, **Skip**. All are ≥ 56 px.
-- At zero (if the app is visible), it plays a short tone and flashes the timer bar. The next-set button is already in focus.
+- At zero (if the app is visible), it plays a loud three-tone alarm as a media clip (lowering music where iOS allows) and flashes the timer bar. The next-set button is already in focus.
+- Experimental Settings toggle "Alarm with phone locked": after Complete set, a clip that is silent until the rest ends and then sounds the alarm starts playing, so it can go off with the screen locked. ±15 s restarts it; Skip stops it. Not guaranteed by iOS.
 - When it reaches zero while the app is hidden, it shows "Rest done" on return and does not play a late tone.
 - During an active session, it requests a Screen Wake Lock where supported and fails silently where not.
 
