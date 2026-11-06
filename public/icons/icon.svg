@@ -1,20 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Ink theme: black page, screentone corner, slanted red panel, inked dumbbell. -->
+  <!-- Ink theme: paper white covered in screentone, black dumbbell dead center. -->
   <defs>
     <pattern id="tone" width="16" height="16" patternUnits="userSpaceOnUse">
-      <circle cx="8" cy="8" r="3" fill="#fff"/>
+      <circle cx="8" cy="8" r="3" fill="#111"/>
     </pattern>
   </defs>
-  <rect width="512" height="512" fill="#111"/>
-  <polygon points="200,0 512,0 512,300" fill="url(#tone)" opacity="0.3"/>
-  <polygon points="0,300 512,190 512,360 0,470" fill="#c8161f"/>
-  <polygon points="0,300 512,190 512,206 0,316" fill="#fff"/>
-  <!-- Dumbbell kept inside the central 80% so it survives maskable cropping. -->
-  <g transform="translate(0 24) rotate(-12 256 280)" fill="#fff" stroke="#111" stroke-width="10" stroke-linejoin="miter">
-    <rect x="86" y="196" width="56" height="168"/>
-    <rect x="142" y="226" width="44" height="108"/>
-    <rect x="370" y="196" width="56" height="168"/>
-    <rect x="326" y="226" width="44" height="108"/>
-    <rect x="186" y="262" width="140" height="36"/>
+  <rect width="512" height="512" fill="#fbfaf6"/>
+  <rect width="512" height="512" fill="url(#tone)" opacity="0.5"/>
+  <!-- Paper outline lifts the dumbbell off the dots; inside the central 80% for maskable crops. -->
+  <g fill="#fbfaf6" stroke="#fbfaf6" stroke-width="32">
+    <rect x="96" y="168" width="56" height="176"/>
+    <rect x="152" y="200" width="44" height="112"/>
+    <rect x="196" y="238" width="120" height="36"/>
+    <rect x="316" y="200" width="44" height="112"/>
+    <rect x="360" y="168" width="56" height="176"/>
+  </g>
+  <g fill="#111">
+    <rect x="96" y="168" width="56" height="176"/>
+    <rect x="152" y="200" width="44" height="112"/>
+    <rect x="196" y="238" width="120" height="36"/>
+    <rect x="316" y="200" width="44" height="112"/>
+    <rect x="360" y="168" width="56" height="176"/>
   </g>
 </svg>
