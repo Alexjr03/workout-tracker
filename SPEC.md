@@ -37,7 +37,7 @@ One spec file; each module below has its own section with acceptance criteria. M
 | `workout-logging` | Today screen, session runner, set logging, swaps, cardio logging, resume after close | `routine`, `rest-timer`, `data-store` |
 | `backup` | JSON export (Share Sheet) and validated import | `data-store` |
 | `history` | Past sessions list/detail, per-exercise progress chart | `data-store`, `routine` |
-| `body-weight` | Daily kg log, chart, 7-day average, start/goal lines | `data-store` |
+| `body-weight` | Weekly kg weigh-ins, chart, start/goal lines | `data-store` |
 | `nutrition` | Daily calories vs max, optional protein target | `data-store` |
 
 Build order: `app-shell`, `data-store` → `routine` → `rest-timer` → `workout-logging` → `backup` → `history` → `body-weight`, `nutrition`
@@ -105,7 +105,6 @@ Workout Tracker/
       rampUp.ts             → prescriptionFor()
       defaults.ts           → defaultWeight(), defaultReps()
       progression.ts        → progressionSuggestion()
-      averages.ts           → sevenDayAverage()
       dates.ts              → local-date helpers
     features/
       today/                → Today screen                                     [workout-logging]
@@ -320,12 +319,11 @@ Pure domain functions with full unit test coverage:
 
 ### `body-weight`
 
-- Log today's weight in kg with a large stepper (±0.1, starting from the last entry, or 88 for the first) and a **Save** button. There is one entry per date; saving again overwrites it.
-- **Chart:**
-  - Daily entries as points.
-  - The **7-day average** as a line: the mean of the entries dated within the trailing 7 calendar days, including that day, where at least one entry exists.
-  - Horizontal reference lines at start (88) and goal (70).
-- Header shows the current 7-day average, the change from start, and the remaining kg to goal.
+*(Changed 2026-11-06 at the owner's request: weekly weigh-ins replace the daily log and 7-day average.)*
+
+- Log a weigh-in in kg with a large stepper (±0.1, starting from the last entry, or 88 for the first) and a **Save** button. Meant once a week; any day works. There is one entry per date; saving again overwrites it.
+- **Chart:** weigh-ins as points joined by a line, with horizontal reference lines at start (88) and goal (70).
+- Header shows the latest weigh-in and its date, the change since the previous weigh-in, the change from start, the remaining kg to goal, and the next weigh-in date (7 days after the latest), or "Weigh-in due today" once that date arrives.
 - Past entries can be edited and deleted (with confirmation).
 
 ### `nutrition`
@@ -378,7 +376,7 @@ export function prescriptionFor(
 
 | Level | Tool | Covers |
 |---|---|---|
-| Unit | Vitest | Everything in `src/domain/` at **100% branch coverage**: ramp-up boundaries (day 13 vs 14, last set optional, 1-set exercise has nothing optional), skipping the optional set still allows progression, progression (all-max, one short, missing set, mixed weights, assistance, bench +2.5), default-weight priority, 7-day average gaps, schedule lookup |
+| Unit | Vitest | Everything in `src/domain/` at **100% branch coverage**: ramp-up boundaries (day 13 vs 14, last set optional, 1-set exercise has nothing optional), skipping the optional set still allows progression, progression (all-max, one short, missing set, mixed weights, assistance, bench +2.5), default-weight priority, schedule lookup |
 | Integration | Vitest + `fake-indexeddb` | Repos, seeding runs once, set write durability, swap history separation, export→import round trip, invalid import leaves data untouched |
 | Component | Vitest + RTL | Steppers, session runner advancing, timer adjust/skip with fake timers |
 | E2E | Playwright (WebKit, iPhone 13 viewport) | Full Upper A session; reload mid-session restores state; offline cold start via `context.setOffline(true)`; cardio log; body weight + chart; calorie over-max state; backup round trip |
@@ -418,7 +416,7 @@ Overall line coverage target: ≥ 80%. Tests are written before or alongside eac
 7. After a session where bench hit 10 reps on all prescribed sets at 10 lb/side, the next Upper A suggests 12.5 lb/side. If any set is short, no suggestion appears.
 8. Swapping Leg press for "Hack squat" logs under a new exercise. Leg press's history, default weight and progression are unchanged.
 9. History shows every finished session and a working chart for each exercise ever logged.
-10. Body weight shows the chart, the 7-day average, and the 88 → 70 reference lines.
+10. Body weight shows the latest weekly weigh-in, change since the last one, the next weigh-in date, the chart, and the 88 → 70 reference lines.
 11. Food shows kcal vs 1,500 with an over-max warning. Protein UI is hidden until a target is set.
 12. Export → clear site data → import restores identical data. A malformed file is rejected with no changes.
 13. Lighthouse (mobile) shows the PWA as installable, with Accessibility ≥ 95 and Performance ≥ 90. The production JS bundle is ≤ 250 KB gzipped.

@@ -2,12 +2,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { deleteBodyWeight, saveBodyWeight } from '../../db/repos/bodyWeight';
 import { db } from '../../db/schema';
-import { sevenDayAverage } from '../../domain/averages';
-import { formatDayLabel, toLocalDate, type LocalDate } from '../../domain/dates';
+import { addDays, formatDayLabel, toLocalDate, type LocalDate } from '../../domain/dates';
 import { LineChart } from '../../ui/LineChart';
 import { Stepper } from '../../ui/Stepper';
 
 const RECENT = 30;
+const WEIGH_IN_DAYS = 7;
 const toX = (date: string) => Date.parse(`${date}T00:00:00Z`);
 const shortDate = (x: number) =>
   new Date(x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
@@ -85,7 +85,8 @@ export function BodyScreen({ now = new Date() }: { now?: Date }) {
   const { settings, entries } = data;
 
   const latest = entries.at(-1);
-  const current = sevenDayAverage(entries, today) ?? latest?.kg ?? null;
+  const previous = entries.at(-2);
+  const nextWeighIn = latest ? addDays(latest.date, WEIGH_IN_DAYS) : null;
   const date = editing ?? today;
   const initial =
     entries.find((e) => e.date === date)?.kg ?? latest?.kg ?? settings.startingWeightKg;
@@ -95,14 +96,21 @@ export function BodyScreen({ now = new Date() }: { now?: Date }) {
       <h1>Body</h1>
 
       <section className="card stack" aria-label="Summary">
-        {current === null ? (
-          <p className="muted">Log your weight to see your 7-day average.</p>
+        {!latest || !nextWeighIn ? (
+          <p className="muted">Log your first weigh-in. Once a week is enough.</p>
         ) : (
           <>
-            <p className="muted">7-day average</p>
-            <p className="stat">{current} kg</p>
-            <p>{signed(current - settings.startingWeightKg)} kg since start</p>
-            <p>{Math.max(0, current - settings.goalWeightKg).toFixed(1)} kg to goal</p>
+            <p className="muted">Latest weigh-in</p>
+            <p className="stat">{latest.kg} kg</p>
+            <p className="muted">{formatDayLabel(latest.date)}</p>
+            {previous && <p>{signed(latest.kg - previous.kg)} kg since last weigh-in</p>}
+            <p>{signed(latest.kg - settings.startingWeightKg)} kg since start</p>
+            <p>{Math.max(0, latest.kg - settings.goalWeightKg).toFixed(1)} kg to goal</p>
+            <p className={nextWeighIn <= today ? 'banner' : 'muted'}>
+              {nextWeighIn <= today
+                ? 'Weigh-in due today'
+                : `Next weigh-in: ${formatDayLabel(nextWeighIn)}`}
+            </p>
           </>
         )}
       </section>
@@ -120,18 +128,9 @@ export function BodyScreen({ now = new Date() }: { now?: Date }) {
         yLabel="kg"
         series={[
           {
-            name: 'Daily',
+            name: 'Weigh-ins',
             tone: 'primary',
             points: entries.map((e) => ({ x: toX(e.date), y: e.kg })),
-          },
-          {
-            name: '7-day average',
-            tone: 'secondary',
-            showPoints: false,
-            points: entries.map((e) => ({
-              x: toX(e.date),
-              y: sevenDayAverage(entries, e.date) ?? e.kg,
-            })),
           },
         ]}
         referenceLines={[

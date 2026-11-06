@@ -380,7 +380,7 @@ Save writes `CardioLog` and finishes the session.
 
 ## Phase 7: Body weight and nutrition
 
-### - [x] T21: Body weight log, chart, 7-day average
+### - [x] T21: Body weight log, chart, 7-day average (changed 2026-11-06 to weekly weigh-ins, no average)
 **Module:** `body-weight`
 **Description:**
 - Add `sevenDayAverage()` in the domain layer: the trailing 7 calendar days including that day, skipping days with no entry.

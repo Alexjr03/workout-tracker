@@ -38,32 +38,39 @@ describe('BodyScreen', () => {
     expect(await db.bodyWeight.count()).toBe(2);
   });
 
-  it('shows the 7-day average, change from start and kg to goal', async () => {
+  it('shows the latest weigh-in, change since last week and since start, kg to goal', async () => {
     await db.bodyWeight.bulkPut([
-      { date: '2026-11-03', kg: 87.8 },
+      { date: '2026-10-30', kg: 87.8 },
       { date: '2026-11-06', kg: 87.0 },
     ]);
     render(<BodyScreen now={NOV_6} />);
     const stats = await screen.findByRole('region', { name: 'Summary' });
-    expect(within(stats).getByText('87.4 kg')).toBeInTheDocument();
-    expect(within(stats).getByText('−0.6 kg since start')).toBeInTheDocument();
-    expect(within(stats).getByText('17.4 kg to goal')).toBeInTheDocument();
+    expect(within(stats).getByText('87 kg')).toBeInTheDocument();
+    expect(within(stats).getByText('Friday, Nov 6')).toBeInTheDocument();
+    expect(within(stats).getByText('−0.8 kg since last weigh-in')).toBeInTheDocument();
+    expect(within(stats).getByText('−1.0 kg since start')).toBeInTheDocument();
+    expect(within(stats).getByText('17.0 kg to goal')).toBeInTheDocument();
+    expect(within(stats).getByText('Next weigh-in: Friday, Nov 13')).toBeInTheDocument();
   });
 
-  it('charts daily weights, the 7-day average and start/goal lines from Settings', async () => {
+  it('says when a weigh-in is due', async () => {
+    await db.bodyWeight.put({ date: '2026-10-30', kg: 87.8 });
+    render(<BodyScreen now={NOV_6} />);
+    const stats = await screen.findByRole('region', { name: 'Summary' });
+    expect(within(stats).getByText('Weigh-in due today')).toBeInTheDocument();
+    expect(within(stats).queryByText(/since last weigh-in/)).not.toBeInTheDocument();
+  });
+
+  it('charts weigh-ins with start/goal lines from Settings', async () => {
     await db.settings.update('settings', { startingWeightKg: 90, goalWeightKg: 72 });
     await db.bodyWeight.bulkPut([
-      { date: '2026-11-03', kg: 87.8 },
+      { date: '2026-10-30', kg: 87.8 },
       { date: '2026-11-06', kg: 87.0 },
     ]);
     render(<BodyScreen now={NOV_6} />);
     expect(await screen.findByRole('group', { name: 'Body weight' })).toBeInTheDocument();
-    const legend = screen.getByRole('list', { name: 'Legend' });
-    expect(
-      within(legend)
-        .getAllByRole('listitem')
-        .map((li) => li.textContent),
-    ).toEqual(['Daily', '7-day average']);
+    expect(screen.queryByRole('list', { name: 'Legend' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Oct 30: 87.8 kg' })).toBeInTheDocument();
     expect(screen.getByText('Start 90')).toBeInTheDocument();
     expect(screen.getByText('Goal 72')).toBeInTheDocument();
   });
