@@ -715,3 +715,11 @@ button[aria-pressed='true'] {
   justify-content: space-between;
   gap: 8px;
 }
+
+.done-card {
+  border-color: var(--accent);
+}
+
+.done-card h2 {
+  color: var(--accent);
+}

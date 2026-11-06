@@ -459,7 +459,7 @@ Save writes `CardioLog` and finishes the session.
 
 Build in this order, a few tasks per session. Each task updates SPEC.md where it changes a rule.
 
-### - [ ] T25: "Workout complete" on Today
+### - [x] T25: "Workout complete" on Today
 **Description:** When today's scheduled session is already finished, Today replaces the big Start card with an encouraging "Workout complete" card (session name, sets, minutes, link to its History entry). Other sessions can still be started from the list.
 
 **Acceptance criteria:**

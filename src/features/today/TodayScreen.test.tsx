@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../../db/schema';
-import { startSession } from '../../db/repos/sessions';
+import { discardSession, finishSession, startSession } from '../../db/repos/sessions';
+import { completeSet } from '../../db/repos/sets';
 import { resetDb } from '../../test/db';
 import { TodayScreen } from './TodayScreen';
 
@@ -124,5 +125,46 @@ describe('TodayScreen', () => {
       ['legs', 'discarded'],
       ['upper-a', 'active'],
     ]);
+  });
+});
+
+describe('TodayScreen: workout complete', () => {
+  async function finishToday(templateId: string) {
+    const start = new Date(2026, 10, 23, 18);
+    const id = await startSession(db, templateId, start);
+    const [first] = await db.sessionExercises.where('sessionId').equals(id).sortBy('order');
+    if (first) await completeSet(db, { slot: first, weight: 10, reps: 10, now: start });
+    await finishSession(db, id, new Date(start.getTime() + 47 * 60_000));
+    return id;
+  }
+
+  it("replaces the Start card once today's session is finished", async () => {
+    const id = await finishToday('upper-a');
+    renderToday('2026-11-23');
+    const done = await screen.findByRole('region', { name: 'Workout complete' });
+    expect(within(done).getByText('Upper A')).toBeInTheDocument();
+    expect(within(done).getByText('1 set · 47 min')).toBeInTheDocument();
+    expect(within(done).getByRole('link', { name: 'See details' })).toHaveAttribute(
+      'href',
+      `/history/session/${id}`,
+    );
+    expect(screen.queryByRole('button', { name: 'Start Upper A' })).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Start a different session' })).toBeInTheDocument();
+  });
+
+  it('counts any session finished today, not only the scheduled one', async () => {
+    await finishToday('legs');
+    renderToday('2026-11-23');
+    const done = await screen.findByRole('region', { name: 'Workout complete' });
+    expect(within(done).getByText('Legs')).toBeInTheDocument();
+  });
+
+  it('ignores discarded sessions and sessions from other days', async () => {
+    const id = await startSession(db, 'upper-a', new Date(2026, 10, 23, 18));
+    await discardSession(db, id);
+    await finishToday('legs'); // dated Nov 23
+    renderToday('2026-11-24');
+    expect(await screen.findByRole('button', { name: 'Start Legs' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Workout complete' })).not.toBeInTheDocument();
   });
 });

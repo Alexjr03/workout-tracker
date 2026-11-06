@@ -1,12 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useId, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { listHistory } from '../../db/repos/history';
 import { discardSession, getActiveSession, startSession } from '../../db/repos/sessions';
 import { db } from '../../db/schema';
 import type { SessionTemplate } from '../../db/types';
 import { daysBetween, formatDayLabel, toLocalDate } from '../../domain/dates';
 import { prescriptionFor } from '../../domain/rampUp';
 import { sessionForDate } from '../../domain/schedule';
+import { historySummary } from '../history/HistoryList';
 import { BackupNudge } from './BackupNudge';
 
 function summary(template: SessionTemplate): string {
@@ -26,15 +28,16 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
   const othersHeading = useId();
 
   const data = useLiveQuery(async () => {
-    const [settings, routine, active] = await Promise.all([
+    const [settings, routine, active, recent] = await Promise.all([
       db.settings.get('settings'),
       db.routine.get('routine'),
       getActiveSession(db),
+      listHistory(db, { limit: 5 }),
     ]);
-    return { settings, routine, active };
-  });
+    return { settings, routine, active, doneToday: recent.find((s) => s.date === today) };
+  }, [today]);
   if (!data?.settings || !data.routine) return null;
-  const { settings, routine, active } = data;
+  const { settings, routine, active, doneToday } = data;
 
   const scheduledId = sessionForDate(today, routine);
   const scheduled = scheduledId === 'rest' ? undefined : routine.sessions[scheduledId];
@@ -91,7 +94,17 @@ export function TodayScreen({ now = new Date() }: { now?: Date }) {
         </div>
       )}
 
-      {scheduled ? (
+      {doneToday ? (
+        <section aria-label="Workout complete" className="card stack done-card">
+          <h2>Workout complete ✓</h2>
+          <p className="history-name">{doneToday.name}</p>
+          <p className="muted">{historySummary(doneToday)}</p>
+          <p>Nice work. Rest up and refuel.</p>
+          <Link to={`/history/session/${doneToday.id}`} className="button-like">
+            See details
+          </Link>
+        </section>
+      ) : scheduled ? (
         <section aria-labelledby={scheduledHeading} className="card stack">
           <h2 id={scheduledHeading}>{scheduled.name}</h2>
           <p className="muted">{summary(scheduled)}</p>

@@ -7,7 +7,7 @@ import { formatDayLabel } from '../../domain/dates';
 
 const PAGE = 30;
 
-function summary(item: HistoryItem): string {
+export function historySummary(item: HistoryItem): string {
   if (item.cardio) return `${item.cardio.machine} · ${item.cardio.durationMin} min`;
   return `${item.sets} ${item.sets === 1 ? 'set' : 'sets'} · ${item.minutes} min`;
 }
@@ -39,7 +39,7 @@ export function HistoryList() {
                 <span className="muted">{formatDayLabel(item.date)}</span>
                 <span className="history-name">{item.name}</span>
                 {item.swapped && <span className="tag">Swapped</span>}
-                <span className="muted">{summary(item)}</span>
+                <span className="muted">{historySummary(item)}</span>
               </Link>
             </li>
           ))}
