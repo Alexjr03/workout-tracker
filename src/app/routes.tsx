@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { BodyScreen } from '../features/body/BodyScreen';
 import { ExerciseProgress } from '../features/history/ExerciseProgress';
 import { HistoryList } from '../features/history/HistoryList';
 import { SessionDetailScreen } from '../features/history/SessionDetailScreen';
@@ -24,7 +25,7 @@ function Placeholder({ title }: { title: string }) {
 export const TABS: Tab[] = [
   { path: '/', label: 'Today', element: <TodayScreen /> },
   { path: '/history', label: 'History', element: <HistoryList /> },
-  { path: '/body', label: 'Body', element: <Placeholder title="Body" /> },
+  { path: '/body', label: 'Body', element: <BodyScreen /> },
   { path: '/food', label: 'Food', element: <Placeholder title="Food" /> },
   { path: '/settings', label: 'Settings', element: <SettingsScreen /> },
 ];

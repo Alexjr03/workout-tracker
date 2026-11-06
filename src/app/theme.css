@@ -677,3 +677,10 @@ button[aria-pressed='true'] {
   color: var(--text-dim);
   font-size: 13px;
 }
+
+.stat {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

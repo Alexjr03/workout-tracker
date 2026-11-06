@@ -84,7 +84,7 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 - [x] T20: Exercise progress chart
 
 ### Phase 7: Body weight and nutrition
-- [ ] T21: Body weight log, chart, 7-day average
+- [x] T21: Body weight log, chart, 7-day average
 - [ ] T22: Nutrition log and protein target
 
 **Checkpoint E:** all modules done · `npm run check` + `npm run test:e2e` green · human review
