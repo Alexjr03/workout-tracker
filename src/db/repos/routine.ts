@@ -1,6 +1,7 @@
 import { Dexie } from 'dexie';
 import type { Weekday } from '../../domain/dates';
 import { convertIncrement, convertWeight, type LiftUnit } from '../../domain/units';
+import { youtubeId } from '../../domain/youtube';
 import type { WorkoutDb } from '../schema';
 import type { ExerciseDef, Routine } from '../types';
 
@@ -206,5 +207,18 @@ export async function setExerciseUnit(db: WorkoutDb, exerciseId: string, unit: L
         },
       });
     }
+  });
+}
+
+/** Saves the owner's YouTube video for an exercise (any YouTube link), or null for the default. */
+export async function setExerciseVideo(db: WorkoutDb, exerciseId: string, link: string | null) {
+  const videoId = link === null ? undefined : youtubeId(link);
+  if (videoId === null) throw new RoutineError("That isn't a YouTube video link.");
+  await db.transaction('rw', db.exercises, async () => {
+    if (!(await db.exercises.get(exerciseId))) {
+      throw new RoutineError(`Unknown exercise ${exerciseId}.`);
+    }
+    // Dexie removes a field updated to undefined, which brings back the built-in video.
+    await db.exercises.update(exerciseId, { videoId });
   });
 }

@@ -44,6 +44,10 @@ const exercise = z.object({
   isCustom: z.boolean(),
   muscle: muscleSchema.nullable(),
   unit: liftUnitSchema,
+  videoId: z
+    .string()
+    .regex(/^[\w-]{11}$/)
+    .optional(),
 });
 
 const session = z.object({

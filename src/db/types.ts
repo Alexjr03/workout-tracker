@@ -47,6 +47,8 @@ export interface ExerciseDef {
   muscle: Muscle | null;
   /** Unit this exercise is weighed in. */
   unit: LiftUnit;
+  /** YouTube video the owner picked; otherwise the built-in one (src/seed/videos.json). */
+  videoId?: string;
 }
 
 export type RirTarget = '~3' | '1-2';

@@ -440,3 +440,15 @@ describe('SessionRunner: swap suggestions', () => {
     expect((await db.exercises.get('dips'))?.muscle).toBe('triceps');
   });
 });
+
+describe('SessionRunner: how-to video', () => {
+  it('opens and closes the video for the current exercise', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'How to do Bench press' }));
+    expect(screen.getByTitle('Bench press how-to video')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '✕ Close' }));
+    expect(screen.queryByTitle('Bench press how-to video')).not.toBeInTheDocument();
+    expect(screen.getByText('Set 1 of 3')).toBeInTheDocument();
+  });
+});

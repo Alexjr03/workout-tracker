@@ -8,6 +8,7 @@ import {
   removeTemplateExercise,
   RoutineError,
   setExerciseUnit,
+  setExerciseVideo,
   setScheduleDay,
   updateExercise,
   updateTemplateExercise,
@@ -246,6 +247,24 @@ describe('setExerciseUnit', () => {
 
   it('rejects an unknown exercise', async () => {
     await expect(setExerciseUnit(db, 'nope', 'kg')).rejects.toThrow(
+      new RoutineError('Unknown exercise nope.'),
+    );
+  });
+});
+
+describe('setExerciseVideo', () => {
+  it('saves a YouTube link as a video id and clears it again', async () => {
+    await setExerciseVideo(db, 'calf-raise', 'https://youtu.be/hWbUlkb5Ms4?si=x');
+    expect((await db.exercises.get('calf-raise'))?.videoId).toBe('hWbUlkb5Ms4');
+    await setExerciseVideo(db, 'calf-raise', null);
+    expect((await db.exercises.get('calf-raise'))?.videoId).toBeUndefined();
+  });
+
+  it('rejects links that are not YouTube videos, and unknown exercises', async () => {
+    await expect(setExerciseVideo(db, 'calf-raise', 'https://vimeo.com/1')).rejects.toThrow(
+      new RoutineError("That isn't a YouTube video link."),
+    );
+    await expect(setExerciseVideo(db, 'nope', null)).rejects.toThrow(
       new RoutineError('Unknown exercise nope.'),
     );
   });

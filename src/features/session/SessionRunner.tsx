@@ -19,6 +19,7 @@ import { RestTimerBar } from '../timer/RestTimerBar';
 import { CardioForm } from './CardioForm';
 import { SessionOverview } from './SessionOverview';
 import { SwapSheet } from './SwapSheet';
+import { VideoSheet } from './VideoSheet';
 import { useRunnerData, type RunnerData, type RunnerSlot } from './useRunnerData';
 
 interface SetEntryProps {
@@ -52,6 +53,7 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
   );
   const [saving, setSaving] = useState(false);
   const [swapping, setSwapping] = useState(false);
+  const [watching, setWatching] = useState(false);
   const unit = loadBasisLabel(def.loadBasis, def.unit);
   // Ramp-up: the last set may be skipped.
   const optional = setIndex >= requiredSets(slot);
@@ -83,12 +85,22 @@ function SetEntry({ current, history, draft, upNext, canUndo, onUndo, restEndsAt
             </button>
           )}
         </div>
+        {watching && <VideoSheet exercise={def} onClose={() => setWatching(false)} />}
         {current.replacesName && <p className="muted">Swapped for {current.replacesName}</p>}
         {swapping && <SwapSheet current={current} onClose={() => setSwapping(false)} />}
-        <p className="runner-set">
-          Set {setIndex + 1} of {slot.prescribedSets}
-          {optional && ' · optional'}
-        </p>
+        <div className="runner-set-row">
+          <p className="runner-set">
+            Set {setIndex + 1} of {slot.prescribedSets}
+            {optional && ' · optional'}
+          </p>
+          <button
+            type="button"
+            aria-label={`How to do ${def.name}`}
+            onClick={() => setWatching(true)}
+          >
+            ▶ How to
+          </button>
+        </div>
         <p className="muted">
           {slot.repMin}–{slot.repMax} reps · {rirText(slot.rirTarget)}
         </p>

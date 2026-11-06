@@ -131,6 +131,30 @@ describe('CatalogEditor', () => {
     expect((await db.exercises.get('bench-press'))?.unit).toBe('lb');
   });
 
+  it('sets a custom video link and opens the how-to video', async () => {
+    inRouter(<CatalogEditor />);
+    await userEvent.click(await screen.findByRole('button', { name: /^Calf raise/ }));
+    const form = screen.getByRole('group', { name: 'Edit Calf raise' });
+    await userEvent.type(within(form).getByRole('textbox', { name: 'YouTube link' }), 'nope');
+    await userEvent.click(within(form).getByRole('button', { name: 'Save link' }));
+    expect(await within(form).findByRole('alert')).toHaveTextContent(
+      "That isn't a YouTube video link.",
+    );
+
+    await userEvent.clear(within(form).getByRole('textbox', { name: 'YouTube link' }));
+    await userEvent.type(
+      within(form).getByRole('textbox', { name: 'YouTube link' }),
+      'https://www.youtube.com/watch?v=hWbUlkb5Ms4',
+    );
+    await userEvent.click(within(form).getByRole('button', { name: 'Save link' }));
+    await vi.waitFor(async () =>
+      expect((await db.exercises.get('calf-raise'))?.videoId).toBe('hWbUlkb5Ms4'),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: '▶ How to' }));
+    expect(await screen.findByTitle('Calf raise how-to video')).toBeInTheDocument();
+  });
+
   it('shows an error and keeps the form open for an empty name', async () => {
     inRouter(<CatalogEditor />);
     await userEvent.click(await screen.findByRole('button', { name: /^Bench press/ }));

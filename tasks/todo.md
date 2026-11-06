@@ -524,7 +524,7 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Files:** `src/domain/units.ts`(+test), `src/domain/session.ts`, `src/db/schema.ts`, `src/db/repos/routine.ts`, feature components showing units
 **Scope:** M–L (split if it grows)
 
-### - [ ] T30: How-to videos (embedded YouTube)
+### - [x] T30: How-to videos (embedded YouTube)
 **Description:** A "▶ How to" button next to the exercise name (runner and Settings → Exercises) opens a bottom sheet with an embedded YouTube video (youtube-nocookie, plays inline, not full screen). Close with a big ✕ or by tapping outside; closing stops playback. Offline shows "Needs internet". One curated video per seed exercise; each replaceable by pasting a YouTube link. Embedding only, no downloaded copies (copyright).
 
 **Acceptance criteria:**
@@ -576,3 +576,7 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Dependencies:** T22, T14
 **Files:** `src/db/schema.ts`, `src/db/types.ts`, `src/db/repos/food.ts`(+test), `src/features/food/FoodScreen.tsx`(+test), `src/features/settings/backup/{exportData,importData,schemas}.ts`
 **Scope:** M
+
+#### T30 notes (2026-11-06)
+- 11 of 21 seed exercises have a built-in video (src/seed/videos.json), each the top YouTube result for "how to do <exercise> proper form" and confirmed embeddable via YouTube oEmbed. Finding the other 10 stopped when YouTube began redirecting automated searches (not worked around). They show "Search YouTube for …" until a link is pasted in Settings → Exercises.
+- Known flaky test: "swaps to a new exercise for this session only" failed once under a heavily loaded full run, passed in 3 reruns.

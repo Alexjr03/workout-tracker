@@ -1,12 +1,18 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useId, useState } from 'react';
 import { Link } from 'react-router';
-import { RoutineError, setExerciseUnit, updateExercise } from '../../../db/repos/routine';
+import {
+  RoutineError,
+  setExerciseUnit,
+  setExerciseVideo,
+  updateExercise,
+} from '../../../db/repos/routine';
 import { db } from '../../../db/schema';
 import type { ExerciseDef, ExerciseType, LoadBasis, Muscle } from '../../../db/types';
 import { loadBasisLabel } from '../../../domain/session';
 import { loadBasisSchema, muscleSchema } from '../../../seed/schemas';
 import { muscleLabel } from '../../session/SwapSheet';
+import { VideoSheet } from '../../session/VideoSheet';
 import { Stepper } from '../../../ui/Stepper';
 
 const BASIS_NAMES: Record<LoadBasis, string> = {
@@ -23,9 +29,22 @@ function ExerciseForm({ exercise, onDone }: { exercise: ExerciseDef; onDone: () 
   const [increment, setIncrement] = useState<number | null>(exercise.increment);
   const [muscle, setMuscle] = useState<Muscle | null>(exercise.muscle);
   const [confirmUnit, setConfirmUnit] = useState(false);
+  const [link, setLink] = useState('');
+  const [watching, setWatching] = useState(false);
   const otherUnit = exercise.unit === 'kg' ? 'lb' : 'kg';
   const [error, setError] = useState<string | null>(null);
-  const ids = { name: useId(), type: useId(), basis: useId(), muscle: useId() };
+  const ids = { name: useId(), type: useId(), basis: useId(), muscle: useId(), link: useId() };
+
+  async function saveLink(value: string | null) {
+    try {
+      await setExerciseVideo(db, exercise.id, value);
+      setLink('');
+      setError(null);
+    } catch (e) {
+      if (!(e instanceof RoutineError)) throw e;
+      setError(e.message);
+    }
+  }
 
   async function save() {
     try {
@@ -118,6 +137,35 @@ function ExerciseForm({ exercise, onDone }: { exercise: ExerciseDef; onDone: () 
             Switch to {otherUnit}
           </button>
         )}
+      </div>
+      <div className="stack">
+        <button type="button" onClick={() => setWatching(true)}>
+          ▶ How to
+        </button>
+        {watching && <VideoSheet exercise={exercise} onClose={() => setWatching(false)} />}
+        <div className="field">
+          <label htmlFor={ids.link}>YouTube link</label>
+          <input
+            id={ids.link}
+            value={link}
+            inputMode="url"
+            autoComplete="off"
+            placeholder={
+              exercise.videoId ? 'Your video is set' : 'Paste a link to use your own video'
+            }
+            onChange={(e) => setLink(e.target.value)}
+          />
+        </div>
+        <div className="row">
+          <button type="button" disabled={link.trim() === ''} onClick={() => void saveLink(link)}>
+            Save link
+          </button>
+          {exercise.videoId && (
+            <button type="button" onClick={() => void saveLink(null)}>
+              Use default video
+            </button>
+          )}
+        </div>
       </div>
       <Stepper
         label="Increment"

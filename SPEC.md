@@ -399,7 +399,7 @@ Overall line coverage target: ≥ 80%. Tests are written before or alongside eac
   - Changing the progression or ramp-up rules.
   - Adding any network call.
 - **Never:**
-  - Add a backend, account, analytics, telemetry or third-party network request.
+  - Add a backend, account, analytics, telemetry or third-party network request. *(One exception, owner request 2026-11-06: how-to videos are YouTube embeds via youtube-nocookie.com that load only when you tap ▶ How to.)*
   - Store data anywhere but on the device.
   - Delete or overwrite user data without an explicit confirmation.
   - Skip or delete failing tests to get green.
