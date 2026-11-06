@@ -25,6 +25,8 @@
   --tap-primary: 56px;
   --nav-height: 64px;
   --gutter: 16px;
+  /* Space under the status bar so titles clear iOS's fade behind it. */
+  --top-gap: 32px;
   --rule: 2.5px;
   --skew: -10deg;
 
@@ -187,11 +189,12 @@ button:disabled {
 /* Big slanted ink block at the top of a screen, like a volume cover. */
 .cover {
   position: relative;
-  margin: calc(-12px - env(safe-area-inset-top))
+  margin: calc(-1 * var(--top-gap) - env(safe-area-inset-top))
     calc(-1 * var(--gutter) - env(safe-area-inset-right)) 0
     calc(-1 * var(--gutter) - env(safe-area-inset-left));
-  padding: calc(env(safe-area-inset-top) + 16px) calc(env(safe-area-inset-right) + var(--gutter))
-    44px calc(env(safe-area-inset-left) + var(--gutter));
+  padding: calc(env(safe-area-inset-top) + var(--top-gap))
+    calc(env(safe-area-inset-right) + var(--gutter)) 44px
+    calc(env(safe-area-inset-left) + var(--gutter));
   background: var(--ink);
   color: #fff;
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 36px), 0 100%);
@@ -360,7 +363,9 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);
+  min-height: calc(
+    100dvh - env(safe-area-inset-top) - var(--top-gap) - env(safe-area-inset-bottom) - 12px
+  );
 }
 
 .runner-header {
@@ -770,7 +775,8 @@ button[aria-pressed='true'] {
 }
 
 .screen {
-  padding: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + var(--gutter))
+  padding: calc(env(safe-area-inset-top) + var(--top-gap))
+    calc(env(safe-area-inset-right) + var(--gutter))
     calc(var(--nav-height) + env(safe-area-inset-bottom) + 16px)
     calc(env(safe-area-inset-left) + var(--gutter));
 }
