@@ -498,7 +498,7 @@ Build in this order, a few tasks per session. Each task updates SPEC.md where it
 **Files:** `src/domain/schedule.ts`(+test), `src/db/types.ts`, `src/db/repos/settings.ts`, `src/features/today/TodayScreen.tsx`(+test)
 **Scope:** M
 
-### - [ ] T28: Swap suggestions by muscle group
+### - [x] T28: Swap suggestions by muscle group
 **Description:** Each exercise gets a main muscle group (seeded for all 21, editable in Settings → Exercises; asked for when creating a new exercise in Swap). The Swap sheet shows a "Same muscle group" section first, then the rest.
 
 **Acceptance criteria:**

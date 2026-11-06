@@ -1,6 +1,10 @@
 import type { WorkoutDb } from '../../../db/schema';
+import exerciseDefaultsJson from '../../../seed/exerciseDefaults.json';
+import { exerciseDefaultsSchema } from '../../../seed/schemas';
 import { BACKUP_SCHEMA_VERSION } from './exportData';
 import { backupSchema, type ValidBackup } from './schemas';
+
+const exerciseDefaults = exerciseDefaultsSchema.parse(exerciseDefaultsJson);
 
 /** A backup that can't be imported; `message` is safe to show as is. */
 export class BackupError extends Error {
@@ -29,6 +33,14 @@ const MIGRATIONS: Record<number, (raw: Raw) => void> = {
     for (const slot of slots as Record<string, unknown>[]) {
       slot.optionalSets ??= 0;
       slot.optionalSkipped ??= false;
+    }
+  },
+  // v2 → v3: exercises gained a muscle group (seed ones get theirs, custom ones none).
+  2: (raw) => {
+    const exercises = raw.data?.exercises;
+    if (!Array.isArray(exercises)) return;
+    for (const e of exercises as Record<string, unknown>[]) {
+      e.muscle ??= exerciseDefaults[String(e.id)]?.muscle ?? null;
     }
   },
 };

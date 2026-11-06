@@ -3,9 +3,10 @@ import { useId, useState } from 'react';
 import { Link } from 'react-router';
 import { RoutineError, updateExercise } from '../../../db/repos/routine';
 import { db } from '../../../db/schema';
-import type { ExerciseDef, ExerciseType, LoadBasis } from '../../../db/types';
+import type { ExerciseDef, ExerciseType, LoadBasis, Muscle } from '../../../db/types';
 import { loadBasisLabel } from '../../../domain/session';
-import { loadBasisSchema } from '../../../seed/schemas';
+import { loadBasisSchema, muscleSchema } from '../../../seed/schemas';
+import { muscleLabel } from '../../session/SwapSheet';
 import { Stepper } from '../../../ui/Stepper';
 
 const BASIS_NAMES: Record<LoadBasis, string> = {
@@ -20,12 +21,19 @@ function ExerciseForm({ exercise, onDone }: { exercise: ExerciseDef; onDone: () 
   const [type, setType] = useState<ExerciseType>(exercise.type);
   const [loadBasis, setLoadBasis] = useState<LoadBasis>(exercise.loadBasis);
   const [increment, setIncrement] = useState<number | null>(exercise.increment);
+  const [muscle, setMuscle] = useState<Muscle | null>(exercise.muscle);
   const [error, setError] = useState<string | null>(null);
-  const ids = { name: useId(), type: useId(), basis: useId() };
+  const ids = { name: useId(), type: useId(), basis: useId(), muscle: useId() };
 
   async function save() {
     try {
-      await updateExercise(db, exercise.id, { name, type, loadBasis, increment: increment ?? 0 });
+      await updateExercise(db, exercise.id, {
+        name,
+        type,
+        loadBasis,
+        increment: increment ?? 0,
+        muscle,
+      });
       onDone();
     } catch (e) {
       if (!(e instanceof RoutineError)) throw e;
@@ -53,6 +61,21 @@ function ExerciseForm({ exercise, onDone }: { exercise: ExerciseDef; onDone: () 
         >
           <option value="compound">Compound</option>
           <option value="isolation">Isolation</option>
+        </select>
+      </div>
+      <div className="field">
+        <label htmlFor={ids.muscle}>Muscle group</label>
+        <select
+          id={ids.muscle}
+          value={muscle ?? ''}
+          onChange={(e) => setMuscle(e.target.value === '' ? null : (e.target.value as Muscle))}
+        >
+          <option value="">Not set</option>
+          {muscleSchema.options.map((m) => (
+            <option key={m} value={m}>
+              {muscleLabel(m)}
+            </option>
+          ))}
         </select>
       </div>
       <div className="field">

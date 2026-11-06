@@ -53,6 +53,7 @@ describe('ensureSeeded', () => {
       loadBasis: 'per-side',
       increment: 2.5,
       isCustom: false,
+      muscle: 'chest',
     });
     expect(await db.exercises.get('assisted-pull-up')).toMatchObject({ loadBasis: 'assistance' });
   });

@@ -27,7 +27,9 @@ export async function setScheduleDay(db: WorkoutDb, day: Weekday, sessionId: str
   });
 }
 
-export type ExercisePatch = Partial<Pick<ExerciseDef, 'name' | 'type' | 'loadBasis' | 'increment'>>;
+export type ExercisePatch = Partial<
+  Pick<ExerciseDef, 'name' | 'type' | 'loadBasis' | 'increment' | 'muscle'>
+>;
 
 /**
  * Edits a catalog exercise, and the templates that use it so names and types agree.

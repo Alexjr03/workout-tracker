@@ -3,6 +3,7 @@ import { isLocalDate } from '../../../domain/dates';
 import {
   exerciseTypeSchema,
   loadBasisSchema,
+  muscleSchema,
   routineSeedSchema,
   scheduleSchema,
   sessionTemplateSchema,
@@ -40,6 +41,7 @@ const exercise = z.object({
   loadBasis: loadBasisSchema,
   increment: positive,
   isCustom: z.boolean(),
+  muscle: muscleSchema.nullable(),
 });
 
 const session = z.object({
@@ -108,10 +110,10 @@ const activeSession = z.object({
   restEndsAt: z.string().nullable(),
 });
 
-/** Current export shape (schemaVersion 2). */
+/** Current export shape (schemaVersion 3). */
 export const backupSchema = z.object({
   app: z.literal('workout-tracker'),
-  schemaVersion: z.literal(2),
+  schemaVersion: z.literal(3),
   exportedAt: z.string(),
   data: z.object({
     settings: z.array(settings),

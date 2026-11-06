@@ -403,3 +403,40 @@ describe('SessionRunner: last time', () => {
     expect(screen.queryByText(/^Last time/)).not.toBeInTheDocument();
   });
 });
+
+describe('SessionRunner: swap suggestions', () => {
+  it('lists same-muscle exercises first, then the rest', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Swap' }));
+    const same = await screen.findByRole('list', { name: 'Same muscle group (Chest)' });
+    expect(
+      within(same)
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['Cable fly', 'Incline dumbbell press']);
+    const rest = screen.getByRole('list', { name: 'Other exercises' });
+    expect(within(rest).queryByRole('button', { name: 'Cable fly' })).not.toBeInTheDocument();
+    expect(within(rest).getAllByRole('button').length).toBeGreaterThan(10);
+  });
+
+  it('gives a new exercise the muscle group picked', async () => {
+    await startSession(db, 'upper-a', MON);
+    renderRunner();
+    await userEvent.click(await screen.findByRole('button', { name: 'Swap' }));
+    const sheet = screen.getByRole('dialog', { name: 'Swap Bench press' });
+    await vi.waitFor(() =>
+      expect(within(sheet).getByRole('combobox', { name: 'Muscle group' })).toHaveDisplayValue(
+        'Chest',
+      ),
+    );
+    await userEvent.selectOptions(
+      within(sheet).getByRole('combobox', { name: 'Muscle group' }),
+      'Triceps',
+    );
+    await userEvent.type(within(sheet).getByRole('textbox', { name: 'New exercise' }), 'Dips');
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Add and swap' }));
+    await screen.findByRole('heading', { name: 'Dips' });
+    expect((await db.exercises.get('dips'))?.muscle).toBe('triceps');
+  });
+});

@@ -65,6 +65,7 @@ describe('swapExercise', () => {
       loadBasis: 'total',
       increment: 5,
       isCustom: true,
+      muscle: 'quads', // taken from the exercise it replaces
     });
     const slot = await slotById(legPress.id);
     expect(slot).toMatchObject({
@@ -126,6 +127,7 @@ describe('swapExercise', () => {
       loadBasis: 'total',
       increment: 5,
       isCustom: true,
+      muscle: 'quads',
     });
     await swapExercise(db, legPress.id, { newName: 'Hack squat' });
     expect((await slotById(legPress.id)).exerciseId).toBe('hack-squat-2');
@@ -174,18 +176,37 @@ describe('swapExercise', () => {
 });
 
 describe('swapOptions', () => {
-  it('lists same-type exercises first by name, then the rest, without the current one', async () => {
+  it('recommends exercises for the same muscle group first', async () => {
     await startToday();
-    const options = await swapOptions(db, legPress.id);
-    expect(options.map((o) => o.id)).not.toContain('leg-press');
-    const firstIsolation = options.findIndex((o) => o.type === 'isolation');
+    const { recommended } = await swapOptions(db, legPress.id);
+    expect(recommended.map((o) => o.name)).toEqual([
+      'Back squat or Smith machine squat',
+      'Leg extension',
+    ]);
+  });
+
+  it('lists the rest same-type first by name, without the current or recommended ones', async () => {
+    await startToday();
+    const { recommended, others } = await swapOptions(db, legPress.id);
+    const ids = others.map((o) => o.id);
+    expect(ids).not.toContain('leg-press');
+    expect(ids.some((id) => recommended.some((r) => r.id === id))).toBe(false);
+    const firstIsolation = others.findIndex((o) => o.type === 'isolation');
     expect(firstIsolation).toBeGreaterThan(0);
-    expect(options.slice(0, firstIsolation).every((o) => o.type === 'compound')).toBe(true);
-    expect(options.slice(firstIsolation).every((o) => o.type === 'isolation')).toBe(true);
-    expect(options[0]?.name).toBe('Assisted pull-up');
+    expect(others.slice(0, firstIsolation).every((o) => o.type === 'compound')).toBe(true);
+    expect(others.slice(firstIsolation).every((o) => o.type === 'isolation')).toBe(true);
+    expect(others[0]?.name).toBe('Assisted pull-up');
+  });
+
+  it('keeps recommending for the original after a swap', async () => {
+    await startToday();
+    await swapExercise(db, legPress.id, { exerciseId: 'face-pull' });
+    const { recommended, others } = await swapOptions(db, legPress.id);
+    expect(recommended.map((o) => o.id)).toEqual(['squat', 'leg-extension', 'leg-press']);
+    expect(others.map((o) => o.id)).not.toContain('face-pull');
   });
 
   it('is empty for an unknown slot', async () => {
-    expect(await swapOptions(db, 'nope')).toEqual([]);
+    expect(await swapOptions(db, 'nope')).toEqual({ recommended: [], others: [] });
   });
 });

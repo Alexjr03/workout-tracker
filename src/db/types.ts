@@ -4,12 +4,13 @@ import type { LocalDate } from '../domain/dates';
 import type {
   ExerciseType,
   LoadBasis,
+  Muscle,
   RoutineSeed,
   Schedule,
   SessionTemplate,
 } from '../seed/schemas';
 
-export type { ExerciseType, LoadBasis, Schedule, SessionTemplate };
+export type { ExerciseType, LoadBasis, Muscle, Schedule, SessionTemplate };
 export type { TemplateExercise } from '../seed/schemas';
 
 export interface Settings {
@@ -41,6 +42,8 @@ export interface ExerciseDef {
   loadBasis: LoadBasis;
   increment: number;
   isCustom: boolean;
+  /** Main muscle group; null for custom exercises without one. */
+  muscle: Muscle | null;
 }
 
 export type RirTarget = '~3' | '1-2';

@@ -1,7 +1,7 @@
 import { progressionSuggestion } from '../../domain/progression';
 import { uniqueSlug } from '../../domain/slug';
 import type { WorkoutDb } from '../schema';
-import type { ExerciseDef } from '../types';
+import type { ExerciseDef, Muscle } from '../types';
 import { exerciseHistory } from './sessions';
 
 export class SwapNotAllowedError extends Error {
@@ -11,7 +11,8 @@ export class SwapNotAllowedError extends Error {
   }
 }
 
-export type SwapTarget = { exerciseId: string } | { newName: string };
+/** A catalog exercise, or a new one (muscle group defaults to the original's). */
+export type SwapTarget = { exerciseId: string } | { newName: string; muscle?: Muscle | null };
 
 /**
  * Replaces the exercise in one session slot. The template is untouched; the substitute logs
@@ -40,6 +41,7 @@ export async function swapExercise(db: WorkoutDb, slotId: string, target: SwapTa
         loadBasis: 'total',
         increment: 5,
         isCustom: true,
+        muscle: target.muscle === undefined ? (originalDef?.muscle ?? null) : target.muscle,
       };
       await db.exercises.add(def);
     } else {
@@ -57,16 +59,27 @@ export async function swapExercise(db: WorkoutDb, slotId: string, target: SwapTa
   });
 }
 
-/** Catalog exercises to swap to: same type as the slot's original first, each group by name. */
-export async function swapOptions(db: WorkoutDb, slotId: string): Promise<ExerciseDef[]> {
+/**
+ * Catalog exercises to swap to, without the current one: `recommended` train the same muscle
+ * group as the slot's original exercise; `others` are the rest, same type first. Each by name.
+ */
+export async function swapOptions(
+  db: WorkoutDb,
+  slotId: string,
+): Promise<{ recommended: ExerciseDef[]; others: ExerciseDef[] }> {
   const slot = await db.sessionExercises.get(slotId);
-  if (!slot) return [];
+  if (!slot) return { recommended: [], others: [] };
   const originalDef = await db.exercises.get(slot.replacesExerciseId ?? slot.exerciseId);
-  const all = await db.exercises.toArray();
-  const byName = (a: ExerciseDef, b: ExerciseDef) => a.name.localeCompare(b.name);
-  const others = all.filter((e) => e.id !== slot.exerciseId);
-  return [
-    ...others.filter((e) => e.type === originalDef?.type).sort(byName),
-    ...others.filter((e) => e.type !== originalDef?.type).sort(byName),
-  ];
+  const all = (await db.exercises.toArray()).filter((e) => e.id !== slot.exerciseId);
+  all.sort((a, b) => a.name.localeCompare(b.name));
+  const muscle = originalDef?.muscle ?? null;
+  const same = (e: ExerciseDef) => muscle !== null && e.muscle === muscle;
+  const rest = all.filter((e) => !same(e));
+  return {
+    recommended: all.filter(same),
+    others: [
+      ...rest.filter((e) => e.type === originalDef?.type),
+      ...rest.filter((e) => e.type !== originalDef?.type),
+    ],
+  };
 }

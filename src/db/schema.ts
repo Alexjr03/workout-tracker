@@ -1,4 +1,6 @@
 import { Dexie, type EntityTable } from 'dexie';
+import exerciseDefaultsJson from '../seed/exerciseDefaults.json';
+import { exerciseDefaultsSchema } from '../seed/schemas';
 import type {
   ActiveSessionState,
   BodyWeightEntry,
@@ -25,6 +27,8 @@ export type WorkoutDb = Dexie & {
   activeSession: EntityTable<ActiveSessionState, 'id'>;
 };
 
+const exerciseDefaults = exerciseDefaultsSchema.parse(exerciseDefaultsJson);
+
 export function createDb(name = 'workout-tracker'): WorkoutDb {
   const db = new Dexie(name) as WorkoutDb;
   // Every version keeps the data of the one before; upgrades only add or fill fields.
@@ -48,6 +52,15 @@ export function createDb(name = 'workout-tracker'): WorkoutDb {
       .modify((slot: Partial<SessionExerciseLog>) => {
         slot.optionalSets ??= 0;
         slot.optionalSkipped ??= false;
+      }),
+  );
+  // v3: muscle groups for swap suggestions; seed exercises get theirs, custom ones none.
+  db.version(3).upgrade((tx) =>
+    tx
+      .table('exercises')
+      .toCollection()
+      .modify((e: Partial<ExerciseDef>) => {
+        e.muscle ??= exerciseDefaults[e.id as keyof typeof exerciseDefaults]?.muscle ?? null;
       }),
   );
   return db;

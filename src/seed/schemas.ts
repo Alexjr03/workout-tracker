@@ -5,6 +5,19 @@ const positiveInt = z.number().int().positive();
 
 export const exerciseTypeSchema = z.enum(['compound', 'isolation']);
 export const loadBasisSchema = z.enum(['per-side', 'per-dumbbell', 'total', 'assistance']);
+/** Main muscle group, used to suggest swaps that train the same thing. */
+export const muscleSchema = z.enum([
+  'chest',
+  'back',
+  'shoulders',
+  'biceps',
+  'triceps',
+  'quads',
+  'hamstrings',
+  'glutes',
+  'calves',
+  'core',
+]);
 
 export const templateExerciseSchema = z
   .strictObject({
@@ -97,7 +110,7 @@ export const routineSeedSchema = z
 
 export const exerciseDefaultsSchema = z.record(
   z.string(),
-  z.strictObject({ loadBasis: loadBasisSchema, increment: positive }),
+  z.strictObject({ loadBasis: loadBasisSchema, increment: positive, muscle: muscleSchema }),
 );
 
 export type RoutineSeed = z.infer<typeof routineSeedSchema>;
@@ -106,3 +119,4 @@ export type TemplateExercise = z.infer<typeof templateExerciseSchema>;
 export type Schedule = z.infer<typeof scheduleSchema>;
 export type ExerciseType = z.infer<typeof exerciseTypeSchema>;
 export type LoadBasis = z.infer<typeof loadBasisSchema>;
+export type Muscle = z.infer<typeof muscleSchema>;

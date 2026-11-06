@@ -90,6 +90,23 @@ describe('CatalogEditor', () => {
     );
   });
 
+  it('sets the muscle group', async () => {
+    inRouter(<CatalogEditor />);
+    await userEvent.click(await screen.findByRole('button', { name: /^Face pull/ }));
+    const form = screen.getByRole('group', { name: 'Edit Face pull' });
+    expect(within(form).getByRole('combobox', { name: 'Muscle group' })).toHaveDisplayValue(
+      'Shoulders',
+    );
+    await userEvent.selectOptions(
+      within(form).getByRole('combobox', { name: 'Muscle group' }),
+      'Back',
+    );
+    await userEvent.click(within(form).getByRole('button', { name: 'Save' }));
+    await vi.waitFor(async () =>
+      expect((await db.exercises.get('face-pull'))?.muscle).toBe('back'),
+    );
+  });
+
   it('shows an error and keeps the form open for an empty name', async () => {
     inRouter(<CatalogEditor />);
     await userEvent.click(await screen.findByRole('button', { name: /^Bench press/ }));

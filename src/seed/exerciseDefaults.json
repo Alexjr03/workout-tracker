@@ -1,23 +1,107 @@
 {
-  "bench-press": { "loadBasis": "per-side", "increment": 2.5 },
-  "machine-row": { "loadBasis": "total", "increment": 5 },
-  "lat-pulldown": { "loadBasis": "total", "increment": 5 },
-  "db-shoulder-press": { "loadBasis": "per-dumbbell", "increment": 5 },
-  "lateral-raise": { "loadBasis": "per-dumbbell", "increment": 5 },
-  "triceps-pushdown": { "loadBasis": "total", "increment": 5 },
-  "squat": { "loadBasis": "per-side", "increment": 2.5 },
-  "romanian-deadlift": { "loadBasis": "per-side", "increment": 2.5 },
-  "leg-press": { "loadBasis": "per-side", "increment": 2.5 },
-  "seated-leg-curl": { "loadBasis": "total", "increment": 5 },
-  "leg-extension": { "loadBasis": "total", "increment": 5 },
-  "calf-raise": { "loadBasis": "total", "increment": 5 },
-  "incline-db-press": { "loadBasis": "per-dumbbell", "increment": 5 },
-  "assisted-pull-up": { "loadBasis": "assistance", "increment": 5 },
-  "seated-cable-row": { "loadBasis": "total", "increment": 5 },
-  "cable-fly": { "loadBasis": "total", "increment": 5 },
-  "db-curl": { "loadBasis": "per-dumbbell", "increment": 5 },
-  "machine-shoulder-press": { "loadBasis": "total", "increment": 5 },
-  "face-pull": { "loadBasis": "total", "increment": 5 },
-  "hammer-curl": { "loadBasis": "per-dumbbell", "increment": 5 },
-  "overhead-triceps-extension": { "loadBasis": "total", "increment": 5 }
+  "bench-press": {
+    "loadBasis": "per-side",
+    "increment": 2.5,
+    "muscle": "chest"
+  },
+  "machine-row": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "back"
+  },
+  "lat-pulldown": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "back"
+  },
+  "db-shoulder-press": {
+    "loadBasis": "per-dumbbell",
+    "increment": 5,
+    "muscle": "shoulders"
+  },
+  "lateral-raise": {
+    "loadBasis": "per-dumbbell",
+    "increment": 5,
+    "muscle": "shoulders"
+  },
+  "triceps-pushdown": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "triceps"
+  },
+  "squat": {
+    "loadBasis": "per-side",
+    "increment": 2.5,
+    "muscle": "quads"
+  },
+  "romanian-deadlift": {
+    "loadBasis": "per-side",
+    "increment": 2.5,
+    "muscle": "hamstrings"
+  },
+  "leg-press": {
+    "loadBasis": "per-side",
+    "increment": 2.5,
+    "muscle": "quads"
+  },
+  "seated-leg-curl": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "hamstrings"
+  },
+  "leg-extension": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "quads"
+  },
+  "calf-raise": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "calves"
+  },
+  "incline-db-press": {
+    "loadBasis": "per-dumbbell",
+    "increment": 5,
+    "muscle": "chest"
+  },
+  "assisted-pull-up": {
+    "loadBasis": "assistance",
+    "increment": 5,
+    "muscle": "back"
+  },
+  "seated-cable-row": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "back"
+  },
+  "cable-fly": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "chest"
+  },
+  "db-curl": {
+    "loadBasis": "per-dumbbell",
+    "increment": 5,
+    "muscle": "biceps"
+  },
+  "machine-shoulder-press": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "shoulders"
+  },
+  "face-pull": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "shoulders"
+  },
+  "hammer-curl": {
+    "loadBasis": "per-dumbbell",
+    "increment": 5,
+    "muscle": "biceps"
+  },
+  "overhead-triceps-extension": {
+    "loadBasis": "total",
+    "increment": 5,
+    "muscle": "triceps"
+  }
 }

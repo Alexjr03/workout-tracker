@@ -30,3 +30,35 @@ describe('schema migrations', () => {
     await db.delete();
   });
 });
+
+describe('schema v3', () => {
+  it('fills muscle groups for seed exercises and null for custom ones', async () => {
+    const name = 'migration-v3-test';
+    const v2 = new Dexie(name);
+    v2.version(2).stores({ exercises: 'id, isCustom' });
+    await v2.table('exercises').bulkAdd([
+      {
+        id: 'leg-press',
+        name: 'Leg press',
+        type: 'compound',
+        loadBasis: 'per-side',
+        increment: 2.5,
+        isCustom: false,
+      },
+      {
+        id: 'hack-squat',
+        name: 'Hack squat',
+        type: 'compound',
+        loadBasis: 'total',
+        increment: 5,
+        isCustom: true,
+      },
+    ]);
+    v2.close();
+
+    const db = createDb(name);
+    expect(await db.exercises.get('leg-press')).toMatchObject({ muscle: 'quads' });
+    expect(await db.exercises.get('hack-squat')).toMatchObject({ muscle: null });
+    await db.delete();
+  });
+});

@@ -57,6 +57,24 @@ describe('parseBackup', () => {
     ).toBe(true);
   });
 
+  it('upgrades a version 2 backup made before muscle groups', async () => {
+    const raw = JSON.parse(JSON.stringify(await buildBackup(db, NOW)));
+    raw.schemaVersion = 2;
+    raw.data.exercises.push({
+      id: 'hack-squat',
+      name: 'Hack squat',
+      type: 'compound',
+      loadBasis: 'total',
+      increment: 5,
+      isCustom: true,
+    });
+    for (const e of raw.data.exercises) delete e.muscle;
+    const { backup } = parseBackup(JSON.stringify(raw));
+    const muscleOf = (id: string) => backup.data.exercises.find((e) => e.id === id)?.muscle;
+    expect(muscleOf('leg-press')).toBe('quads');
+    expect(muscleOf('hack-squat')).toBeNull();
+  });
+
   it.each([
     ['not JSON', '{oops', 'This file is not valid JSON.'],
     [
