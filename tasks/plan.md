@@ -95,6 +95,17 @@ T1 scaffold ─ T2 PWA shell ─ T3 deploy (iPhone install check)
 
 **Checkpoint F:** every SPEC success criterion checked off
 
+### Phase 9: Owner feedback (added 2026-11-06)
+- [ ] T25: "Workout complete" on Today
+- [ ] T26: Last-time weights on every set
+- [ ] T27: Push back a day
+- [ ] T28: Swap suggestions by muscle group
+- [ ] T29: kg or lb per exercise
+- [ ] T30: How-to videos (embedded YouTube)
+- [ ] T31: Louder rest alarm
+
+**Checkpoint G:** owner tried each at the gym
+
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |

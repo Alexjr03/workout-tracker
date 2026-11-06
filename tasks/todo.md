@@ -452,3 +452,104 @@ Save writes `CardioLog` and finishes the session.
 ### Checkpoint F: Done
 - [ ] Every SPEC success criterion checked
 - [ ] Spec updated with any decisions that changed during the build
+
+---
+
+## Phase 9: Owner feedback after 3 sessions (added 2026-11-06)
+
+Build in this order, a few tasks per session. Each task updates SPEC.md where it changes a rule.
+
+### - [ ] T25: "Workout complete" on Today
+**Description:** When today's scheduled session is already finished, Today replaces the big Start card with an encouraging "Workout complete" card (session name, sets, minutes, link to its History entry). Other sessions can still be started from the list.
+
+**Acceptance criteria:**
+- [ ] Finished today's session → no Start button for it; "Workout complete" card shows instead.
+- [ ] A discarded session doesn't count as done; an active one still shows Resume.
+- [ ] Rest days and other days are unchanged.
+
+**Verification:** `npm run check`
+**Dependencies:** T19
+**Files:** `src/features/today/TodayScreen.tsx`(+test)
+**Scope:** S
+
+### - [ ] T26: Last-time weights on every set
+**Description:** The runner shows what you did last time for the current exercise, e.g. "Last time: 10 × 10 · 10 × 10 · 10 × 9". The existing progression keeps pre-filling the next weight step when every set hit repMax, with the "↑" badge, so both last time and the increase are visible.
+
+**Acceptance criteria:**
+- [ ] "Last time" line shows the previous finished session's sets for that exercise (not the current session).
+- [ ] Hidden when there is no history; swapped-in exercises show their own history.
+- [ ] Runner still fits on 375×667 (E2E).
+
+**Verification:** `npm run check:full`
+**Dependencies:** T8
+**Files:** `src/features/session/SessionRunner.tsx`(+test), `e2e/session.spec.ts`
+**Scope:** S
+
+### - [ ] T27: Push back a day
+**Description:** "Can't train today" on Today makes today a rest day and moves the rest of the week's sessions one day later, using up a weekend rest day. Allowed up to 2 times per week (one per rest day available after today). Resets every Monday to the normal schedule.
+
+**Acceptance criteria:**
+- [ ] Pure function: schedule + push-back dates for the week → session for any date; tested for 0/1/2 push-backs and the Monday reset.
+- [ ] Refused when no rest day is left after today, or today's session is already finished/active.
+- [ ] Today, the ramp-up badge and History stay consistent with the shifted week.
+
+**Verification:** `npm run check` (100% branches in the new domain function)
+**Dependencies:** T7
+**Files:** `src/domain/schedule.ts`(+test), `src/db/types.ts`, `src/db/repos/settings.ts`, `src/features/today/TodayScreen.tsx`(+test)
+**Scope:** M
+
+### - [ ] T28: Swap suggestions by muscle group
+**Description:** Each exercise gets a main muscle group (seeded for all 21, editable in Settings → Exercises; asked for when creating a new exercise in Swap). The Swap sheet shows a "Same muscle group" section first, then the rest.
+
+**Acceptance criteria:**
+- [ ] Seed has a muscle group for every exercise; schema migration fills existing data.
+- [ ] Swapping Leg press lists other quad/leg exercises first.
+- [ ] Custom exercises without a group still appear under "Other exercises".
+
+**Verification:** `npm run check`
+**Dependencies:** T11, T16
+**Files:** `src/seed/exerciseDefaults.json`, `src/db/schema.ts`, `src/db/repos/exercises.ts`(+test), `src/features/session/SwapSheet.tsx`, `src/features/settings/routine/CatalogEditor.tsx`
+**Scope:** M
+
+### - [ ] T29: kg or lb per exercise
+**Description:** Each exercise has its own lift unit (gym dumbbells are kg, plates lb). Dumbbell exercises default to kg, everything else to lb; editable in Settings → Exercises. Labels everywhere use the exercise's unit. Past logged numbers are kept as typed (owner unsure what was entered) and only relabelled; changing an exercise's unit later converts its history and increment. The stashed global-switch WIP (`units.ts` conversion) can be reused.
+
+**Acceptance criteria:**
+- [ ] Runner, Overview, Summary, History and charts show "kg each" / "lb/side" per exercise.
+- [ ] Migration relabels existing per-dumbbell exercises to kg without changing numbers.
+- [ ] Unit change in the editor converts that exercise's sets, suggestions and increment (asks first).
+
+**Verification:** `npm run check:full`
+**Dependencies:** T16
+**Files:** `src/domain/units.ts`(+test), `src/domain/session.ts`, `src/db/schema.ts`, `src/db/repos/routine.ts`, feature components showing units
+**Scope:** M–L (split if it grows)
+
+### - [ ] T30: How-to videos (embedded YouTube)
+**Description:** A "▶ How to" button next to the exercise name (runner and Settings → Exercises) opens a bottom sheet with an embedded YouTube video (youtube-nocookie, plays inline, not full screen). Close with a big ✕ or by tapping outside; closing stops playback. Offline shows "Needs internet". One curated video per seed exercise; each replaceable by pasting a YouTube link. Embedding only, no downloaded copies (copyright).
+
+**Acceptance criteria:**
+- [ ] All 21 seed exercises have a checked video; custom exercises fall back to a YouTube search link.
+- [ ] Open and close in one tap each; sets stay visible under the sheet.
+- [ ] Pasted links are validated as YouTube video URLs.
+
+**Verification:** `npm run check:full` · manual on iPhone
+**Dependencies:** T16
+**Files:** `src/seed/exerciseDefaults.json`, `src/features/session/VideoSheet.tsx`(+test), `src/features/settings/routine/CatalogEditor.tsx`
+**Scope:** M (video search is its own sub-step)
+
+### - [ ] T31: Louder rest alarm
+**Description:** Play the end-of-rest alarm loudly over music: Audio Session API set so it ducks other audio and ignores the silent switch where iOS supports it, with a longer, louder tone. Then an experiment for a locked phone (background audio workaround), shipped behind a Settings toggle and tested at the gym. A locked-phone alarm can't be promised: iOS freezes web apps when locked, and push notifications would need a server.
+
+**Acceptance criteria:**
+- [ ] Alarm plays with the ringer switch on silent and over music (owner confirms at the gym).
+- [ ] Locked-phone experiment result recorded here; kept only if it works.
+- [ ] Existing timer tests still pass.
+
+**Verification:** `npm run check` · manual at the gym
+**Dependencies:** T10
+**Files:** `src/features/timer/alerts.ts`(+test), `src/features/settings/SettingsScreen.tsx`
+**Scope:** M (includes on-device testing)
+
+### Checkpoint G: Feedback round
+- [ ] T25–T31 done or explicitly dropped
+- [ ] Owner tried each at the gym
